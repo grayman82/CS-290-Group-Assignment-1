@@ -1,0 +1,41 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--External Libraries!-->
+<!--<script type="text/javascript" src="js/gl-matrix.js"></script>!-->
+<script type="text/javascript" src = "GLEAT/js/gl-matrix-min.js"></script>
+<script type="text/javascript" src="GLEAT/js/webgl-utils.js"></script>
+<script type="text/javascript" src="GLEAT/js/webgl-debug.js"></script>
+<script type="text/javascript" src="GLEAT/js/numeric-1.2.6.min.js"></script>
+<script type="text/javascript" src="GLEAT/js/jquery-1.11.1.min.js"></script>
+
+<!--D3 stuff!-->
+<script src="libs/d3-collection.v0.1.min.js"></script>
+<script src="libs/d3-dispatch.v0.3.min.js"></script>
+<script src="libs/d3-dsv.v0.2.min.js"></script>
+<script src="libs/d3-request.min.js"></script>
+<script src="libs/d3.min.js"></script>
+
+<!--Our Scripts!-->
+<script src="GLEAT/Geometry/PolyMesh.js"></script>
+<script src="GLEAT/Geometry/Primitives3D.js"></script>
+<script src="GLEAT/Geometry/Cameras3D.js"></script>
+<script src="GLEAT/DrawingUtils/Shaders.js"></script>
+<script src="GLEAT/DrawingUtils/SimpleDraw.js"></script>
+<script src="GLEAT/Viewers/SimpleMeshCanvas.js"></script>
+<script src="SceneFile.js"></script>
+</head>
+
+<body>
+
+<canvas id="GLCanvas1" style="border: none;" width="800" height="600"></canvas>
+
+<script>
+    var glcanvas = document.getElementById("GLCanvas1");
+    glcanvas.addEventListener("contextmenu", function(e){ e.stopPropagation(); e.preventDefault(); return false; }); //Need this to disable the menu that pops up on right clicking
+    var scene = loadScene('SampleScene.scn', glcanvas);
+</script>
+
+</body>
+</html>
