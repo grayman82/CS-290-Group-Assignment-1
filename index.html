@@ -25,16 +25,87 @@
 <script src="GLEAT/DrawingUtils/SimpleDraw.js"></script>
 <script src="GLEAT/Viewers/SimpleMeshCanvas.js"></script>
 <script src="SceneFile.js"></script>
+<script src="Algorithms.js"></script>
 </head>
 
 <body>
 
+<table><tr><td>
 <canvas id="GLCanvas1" style="border: none;" width="800" height="600"></canvas>
+</td>
+<td>
+
+<h3>Options</h3>
+<table>
+<tr><td>Display Mesh Edges</td><td><input type="checkbox" id="meshEdgesCheckbox" /></td></tr>
+<tr><td>Display Image Sources</td><td><input type="checkbox" id="displayImageSourcesCheckbox" /></td></tr>
+<tr><td>Display Paths</td><td><input type="checkbox" id="displayPathsCheckbox" /></td></tr>
+</table>
+
+<h3>Viewpoint</h3>
+<table>
+<tr>
+<td><button type="button" id = "sourceButton" onclick="callViewFromSource()">Source</button></td>
+<td><button type="button" id = "receiverButton" onclick="callViewFromReceiver()">Receiver</button></td>
+<td><button type="button" id = "externalButton" onclick="callViewFromExternal()">External</button></td>
+</tr>
+<tr><td>Source Pos:</td><td colspan = "2"><div id="sourcePos">hi</div></td></tr>
+<tr><td>Receiver Pos:</td><td colspan = "2"><div id="receiverPos"></div></td></tr>
+<tr><td>External Pos:</td><td colspan = "2"><div id="externalPos"></div></td></tr>
+</table>
+
+<h3>Algorithm</h3>
+<table>
+<tr><td><button type="button" id = "sourcesButton" onclick="callComputeImageSources()">Compute Image Sources</button> of order <input type="text" id="sourceorder" size="1"></input></td></tr>
+<tr><td><button type="button" id = "pathsButton" onclick="callExtractPaths()">Extract Paths Source To Receiver</button></td></tr>
+<tr><td><button type="button" id = "sourceButton" onclick="callComputeImpulseResponse()">Compute Impulse Response</button></td></tr>
+</table>
 
 <script>
     var glcanvas = document.getElementById("GLCanvas1");
     glcanvas.addEventListener("contextmenu", function(e){ e.stopPropagation(); e.preventDefault(); return false; }); //Need this to disable the menu that pops up on right clicking
     var scene = loadScene('SampleScene.scn', glcanvas);
+    
+    var meshEdgesCheckbox = document.getElementById('meshEdgesCheckbox');
+    meshEdgesCheckbox.addEventListener('change', function(e) {
+        glcanvas.drawEdges = meshEdgesCheckbox.checked;
+        requestAnimFrame(glcanvas.repaint);
+    });
+    meshEdgesCheckbox.checked = true;
+    
+    var displayImageSourcesCheckbox = document.getElementById('displayImageSourcesCheckbox');
+    displayImageSourcesCheckbox.addEventListener('change', function(e) {
+        glcanvas.drawImageSources = displayImageSourcesCheckbox.checked;
+        requestAnimFrame(glcanvas.repaint);
+    });
+    displayImageSourcesCheckbox.checked = true;
+    var displayPathsCheckbox = document.getElementById('displayPathsCheckbox');
+    displayPathsCheckbox.addEventListener('change', function(e) {
+        glcanvas.drawPaths = displayPathsCheckbox.checked;
+        requestAnimFrame(glcanvas.repaint);
+    });
+    displayPathsCheckbox.checked = true;
+    
+    function callViewFromSource() {
+        glcanvas.viewFromSource();
+    }
+    function callViewFromReceiver() {
+        glcanvas.viewFromReceiver();
+    }
+    function callViewFromExternal() {
+        glcanvas.viewFromExternal();
+    }
+    function callComputeImageSources() {
+        var orderTxt = document.getElementById("sourceorder");
+        var order = parseInt(orderTxt.value);
+        glcanvas.computeImageSources(order);
+    }
+    function callExtractPaths() {
+        glcanvas.extractPaths();
+    }
+    function callComputeImpulseResponse() {
+        glcanvas.computeImpulseResponse();
+    }
 </script>
 
 </body>
