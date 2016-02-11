@@ -35,6 +35,11 @@
 </td>
 <td>
 
+<h3>Scene</h3>
+<table>
+<tr><td>Scene File</td><td><input type = "file" id = "sceneInput"></td></tr>
+</table>
+
 <h3>Options</h3>
 <table>
 <tr><td>Display Mesh Edges</td><td><input type="checkbox" id="meshEdgesCheckbox" /></td></tr>
@@ -49,7 +54,7 @@
 <td><button type="button" id = "receiverButton" onclick="callViewFromReceiver()">Receiver</button></td>
 <td><button type="button" id = "externalButton" onclick="callViewFromExternal()">External</button></td>
 </tr>
-<tr><td>Source Pos:</td><td colspan = "2"><div id="sourcePos">hi</div></td></tr>
+<tr><td>Source Pos:</td><td colspan = "2"><div id="sourcePos"></div></td></tr>
 <tr><td>Receiver Pos:</td><td colspan = "2"><div id="receiverPos"></div></td></tr>
 <tr><td>External Pos:</td><td colspan = "2"><div id="externalPos"></div></td></tr>
 </table>
@@ -61,10 +66,47 @@
 <tr><td><button type="button" id = "sourceButton" onclick="callComputeImpulseResponse()">Compute Impulse Response</button></td></tr>
 </table>
 
+<h3>Audio Playback</h3>
+<table>
+
+<tr>
+<td>Audio File</td>
+<td><button type = "button" onclick = "playAudioSource()">Play</button></td>
+<td><button type = "button" onclick = "pauseAudio()">Stop</button></td>
+<td><input type = "file" id = "audioInput"></td>
+</tr>
+
+<tr>
+<td>Impulse Response</td>
+<td><button type = "button" onclick = "playAudioImpulse()">Play</button></td>
+<td><button type = "button" onclick = "pauseAudio()">Stop</button></td>
+<td></td>
+</tr>
+
+<tr>
+<td>Convolution</td>
+<td><button type = "button" onclick = "playAudioConv()">Play</button></td>
+<td><button type = "button" onclick = "pauseAudio()">Stop</button></td>
+<td><button type = "button" onclick = "recomputeConv()">Recompute</button></td>
+</tr>
+
+</table>
+
+
 <script>
     var glcanvas = document.getElementById("GLCanvas1");
     glcanvas.addEventListener("contextmenu", function(e){ e.stopPropagation(); e.preventDefault(); return false; }); //Need this to disable the menu that pops up on right clicking
-    var scene = loadScene('SampleScene.scn', glcanvas);
+    var scene = loadSceneFromFile('SampleScene.scn', glcanvas);
+    
+    var sceneInput = document.getElementById('sceneInput');
+    sceneInput.addEventListener('change', function(e) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var data = e.target.result;
+            setupScene(JSON.parse(data), glcanvas);
+        }
+        reader.readAsText(sceneInput.files[0]);
+    });
     
     var meshEdgesCheckbox = document.getElementById('meshEdgesCheckbox');
     meshEdgesCheckbox.addEventListener('change', function(e) {
@@ -105,6 +147,71 @@
     }
     function callComputeImpulseResponse() {
         glcanvas.computeImpulseResponse();
+    }
+    
+    ///////////////////////////////////////////
+    //             Audio stuff               //
+    ///////////////////////////////////////////
+    var source = null;
+    var analyser = null;
+    var buffer = null;
+    var impbuffer = null;
+    var convbuffer = null;
+    var context = new (window.AudioContext || window.webkitAudioContext)();
+    function playAudioSource() {
+        playAudio(buffer);
+    }
+    
+    function playAudioImpulse() {
+        playAudio(impbuffer);
+    }
+    
+    function playAudioConv() {
+        playAudio(convbuffer);
+    }
+    
+    function playAudio(b) {
+        if (context === null) {
+            return;
+        }
+        if (!(source === null)) {
+            source.stop();
+        }
+        source = context.createBufferSource();
+        source.buffer = b;
+        analyser = context.createAnalyser();
+        source.connect(analyser);
+        analyser.connect(context.destination);
+        source.start();
+        playing = true;
+    }
+    
+    function pauseAudio() {
+        if (source === null) {
+            return;
+        }
+        playing = false;
+        source.stop();
+    }
+
+    var audioInput = document.getElementById('audioInput');
+    audioInput.addEventListener('change', function(e) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var data = e.target.result;
+            if(context.decodeAudioData) {
+                context.decodeAudioData(data, function(buff) {
+                buffer = buff;
+                }, function(e) {
+                    console.log(e);
+                });
+            }
+        }        
+        reader.readAsArrayBuffer(audioInput.files[0]);
+    });
+    
+    function recomputeConv() {
+        //TODO: Fill this in
     }
 </script>
 

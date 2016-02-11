@@ -28,7 +28,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     //Step 5: Return the intersection point if it exists or null if it's outside
     //of the polygon or if the ray is perpendicular to the plane normal (no intersection)
     
-    return {t:0, P:vec3.fromValues(0, 0, 0)}; //These are dummy values, but you should return 
+    return {t:1e9, P:vec3.fromValues(0, 0, 0)}; //These are dummy values, but you should return 
     //both an intersection point and a parameter t.  The parameter t will be used to sort
     //intersections in order of occurrence to figure out which one happened first
 }
@@ -49,26 +49,37 @@ function addImageSourcesFunctions(scene) {
     
     //Inputs: order (int) : The maximum number of bounces to take
     scene.computeImageSources = function(order) {
+        scene.source.order = 0;//Store an order field to figure out how many 
+        //bounces a particular image represents
+        scene.source.parent = null;//Keep track of the image source's parent
+        scene.source.genFace = null//Keep track of the mesh face that generated this image
+        //Remember not to reflect an image across the face that just generated it, 
+        //or you'll get its parent image
         scene.imsources = [scene.source];
         
-        //TODO: Fill the rest of this in
+        //TODO: Fill the rest of this in.  
+        scene.computeImageSourcesRec(1, order);
+        console.log("There are " + scene.imsources.length + " images");
     }    
     
     
     //Purpose: A recursive function which helps to compute intersections of rays
     //with faces in the scene, taking into consideration the scene graph structure
-    //Inputs: node (object): node in scene tree to process, 
+    //Inputs: P0 (vec3): Ray starting point, V (vec3): ray direction
+    //node (object): node in scene tree to process, 
     //mvMatrix (mat4): Matrix to put geometry in this node into world coordinates
-    scene.rayIntersectFaces = function(node, mvMatrix) {
+    scene.rayIntersectFaces = function(P0, V, node, mvMatrix) {
         var tmin = Infinity;//The parameter along the ray of the nearest intersection
         var PMin = null;//The point of intersection corresponding to the nearest interesection
         var faceMin = null;//The face object corresponding to the nearest intersection
-        
+        if (node === null) {
+            return {tmin:tmin, PMin:PMin, faceMin:faceMin};
+        }
         if ('mesh' in node) { //Make sure it's not just a dummy transformation node
             var mesh = node.mesh;
             for (var f = 0; f < mesh.faces.length; f++) {
-                var res = scene.rayIntersectFaces(mesh.faces[f].getVerticesPos(), mvMatrix);
-                if (res.t < tmin) {
+                var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix);
+                if (!(res === null) && (res.t < tmin)) {
                     tmin = res.t;
                     PMin = res.P;
                     faceMin = mesh.faces[f];
@@ -84,7 +95,7 @@ function addImageSourcesFunctions(scene) {
                 //Multiply on the right by the next transformation
                 mat4.mul(nextmvMatrix, mvMatrix, node.children[i].transform);
                 var cres = scene.rayIntersectFaces(node.children[i], nextmvMatrix);
-                if (cres.t < tmin) {
+                if (!(cres === null) && (cres.t < tmin)) {
                     tmin = cres.t;
                     PMin = cres.P;
                     faceMin = cres.faceMin;
@@ -116,8 +127,9 @@ function addImageSourcesFunctions(scene) {
         vec3.subtract(V, scene.source.pos, scene.receiver.pos); //Ray points towards source
         //Check to make sure there's nothing in the way
         var mvMatrix = mat4.create(); //Start with identity matrix at root of scene tree
-        var res = scene.rayIntersectFaces(scene, mvMatrix);
-        if (res.faceMin === null) {
+        var res = scene.rayIntersectFaces(P0, V, scene, mvMatrix);
+        console.log("res = " + res);
+        if (res.faceMin === null || res.t > 1) { //Either it hit nothing or it hit something further away than the source
             //There's nothing in the way, so add the direct path
             //NOTE: scene.receiver and scene.source each already both have
             //"pos" and "rcoeff" fields, but you'll need to make sure that

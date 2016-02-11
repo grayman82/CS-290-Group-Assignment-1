@@ -51,52 +51,56 @@ function parseNode(node) {
     }
 }
 
-function loadScene(filename, glcanvas) {
+function setupScene(scene, glcanvas) {
+    //Setup camera objects for the source and receiver
+    var rc = new FPSCamera(0, 0, 0.75);
+    rc.pos = vec3.fromValues(scene.receiver[0], scene.receiver[1], scene.receiver[2]);
+    var sc = new FPSCamera(0, 0, 0.75);
+    sc.pos = vec3.fromValues(scene.source[0], scene.source[1], scene.source[2]);
+    
+    //Make them look roughly at each other but in the XZ plane, if that's a nonzero projection
+    var T = vec3.create();
+    vec3.subtract(T, sc.pos, rc.pos);
+    T[1] = 0;
+    if (T[0] == 0 && T[2] == 0) {
+        //If it's a nonzero projection (one is right above the other on y)
+        //Just go back to (0, 0, -1) as the towards direction
+        T[1] = 1;
+    }
+    else {
+        vec3.normalize(T, T);
+    }
+    vec3.cross(rc.right, T, rc.up);
+    vec3.cross(sc.right, sc.up, T);
+    //By default, sound doesn't decay at the source and the receiver
+    rc.rcoeff = 1.0;
+    sc.rcoeff = 1.0;
+    scene.receiver = rc;
+    scene.source = sc;
+    
+    //Now recurse and setup all of the children nodes in the tree
+    for (var i = 0; i < scene.children.length; i++) {
+        parseNode(scene.children[i]);
+    }
+    
+    //By default no paths and no image sources; user chooses when to compute
+    scene.imsources = [scene.source];
+    scene.paths = [];
+    
+    //Add algorithm functions to this object
+    addImageSourcesFunctions(scene);
+    
+    //Now that the scene has loaded, setup the glcanvas
+    SceneCanvas(glcanvas, 'GLEAT/DrawingUtils', 800, 600, scene);
+    requestAnimFrame(glcanvas.repaint);
+}
+
+function loadSceneFromFile(filename, glcanvas) {
     //Use d3 JSON parser to get the scene data in
     d3.json(filename, function(error, scene) {
         if (error) throw error;
-        //Setup camera objects for the source and receiver
-        var rc = new FPSCamera(0, 0, 0.75);
-        rc.pos = vec3.fromValues(scene.receiver[0], scene.receiver[1], scene.receiver[2]);
-        var sc = new FPSCamera(0, 0, 0.75);
-        sc.pos = vec3.fromValues(scene.source[0], scene.source[1], scene.source[2]);
-        
-        //Make them look roughly at each other but in the XZ plane, if that's a nonzero projection
-        vec3.subtract(rc.towards, sc.pos, rc.pos);
-        vec3.subtract(sc.towards, rc.pos, sc.pos);
-        rc.towards[1] = 0;
-        sc.towards[1] = 0;
-        if (rc.towards[0] == 0 && rc.towards[2] == 0) {
-            //If it's a nonzero projection (one is right above the other on y)
-            //Just go back to (0, 0, -1) as the towards direction
-            rc.towards = vec3.fromValues(0, 0, -1);
-            sc.towards = vec3.fromValues(0, 0, -1);
-        }
-        else {
-            vec3.normalize(rc.towards, rc.towards);
-            vec3.normalize(sc.towards, sc.towards);
-        }
-        //By default, sound doesn't decay at the source and the receiver
-        rc.rcoeff = 1.0;
-        sc.rcoeff = 1.0;
-        scene.receiver = rc;
-        scene.source = sc;
-        
-        //Now recurse and setup all of the children nodes in the tree
-        for (var i = 0; i < scene.children.length; i++) {
-            parseNode(scene.children[i]);
-        }
-        
-        //By default no paths and no image sources; user chooses when to compute
-        scene.imsources = [scene.source];
-        scene.paths = [];
-        
-        //Add algorithm functions to this object
-        addImageSourcesFunctions(scene);
-        
-        //Now that the scene has loaded, setup the glcanvas
-        SceneCanvas(glcanvas, 'GLEAT/DrawingUtils', 800, 600, scene);
-        requestAnimFrame(glcanvas.repaint);
+        setupScene(scene, glcanvas);
+        return scene;
     });
 }
 
@@ -203,7 +207,6 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
 		mat4.perspective(pMatrix, 45, glcanvas.gl.viewportWidth / glcanvas.gl.viewportHeight, 0.01, 100.0);
 		//First get the global modelview matrix based on the camera
 		var mvMatrix = glcanvas.camera.getMVMatrix();
-		//outputMatrix(mvMatrix);
 		//Then drawn the scene
 		var scene = glcanvas.scene;
 		if ('children' in scene) {
@@ -226,7 +229,10 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         //Draw the image sources as magenta beacons
         if (glcanvas.drawImageSources) {
             for (var i = 0; i < glcanvas.scene.imsources.length; i++) {
-                drawBeacon(glcanvas, pMatrix, mvMatrix, glcanvas.scene.imsources[i], glcanvas.beaconMesh, vec3.fromValues(1, 0, 1));
+                if (glcanvas.scene.imsources[i] == glcanvas.scene.source) {
+                    continue;
+                }
+                drawBeacon(glcanvas, pMatrix, mvMatrix, glcanvas.scene.imsources[i], glcanvas.beaconMesh, vec3.fromValues(1, 0, 1)); 
             }
         }
         
@@ -235,7 +241,7 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
             glcanvas.pathDrawer.repaint(pMatrix, mvMatrix);
         }
         
-		//Draw lines and points fro debugging
+		//Draw lines and points for debugging
 		glcanvas.drawer.reset(); //Clear lines and points drawn last time
 		//TODO: Paint debugging stuff here if you'd like
 		glcanvas.drawer.repaint(pMatrix, mvMatrix);
@@ -305,7 +311,8 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
 		this.lastY = mousePos.Y;
 		if (this.dragging) {
 		    //Rotate camera by mouse dragging
-			this.camera.rotate(-dX, -dY);
+		    this.camera.rotateLeftRight(-dX);
+		    this.camera.rotateUpDown(-dY);
 		    requestAnimFrame(this.repaint);
 		}
 		return false;

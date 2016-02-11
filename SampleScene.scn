@@ -1,36 +1,17 @@
 {
     "name":"testscene",
-    "receiver":[5, 1.5, 0],
-    "source":[-5, 1.5, 0], 
+    "receiver":[3, 1.5, 0],
+    "source":[-3, 1.5, 0], 
     "children":[
         { 
+            "name":"child",
             "mesh":"meshes/box.off",
-            "color":[0.0, 0.5, 0.0],
+            "color":[0.7, 0.7, 0.7],
             "rcoeff":0.5,
-            "transform":[1, 0, 0, 0,
-                         0, 1, 0, 0.5,
-                         0, 0, 1, 0,
-                         0, 0, 0, 1],  
-            "children":[
-                { 
-                "mesh":"meshes/box.off",
-                "color":[0.0, 0.5, 1.0],
-                "rcoeff":0.5,
-                "transform":[2, 0, 0, 2,
-                             0, 1, 0, 0,
-                             0, 0, 1, 0,
-                             0, 0, 0, 1]     
-                }
-            ]
-        },
-        {
-            "mesh":"meshes/square.off",
-            "color":[0.8, 0.8, 0.8],
-            "rcoeff":0.5,
-            "transform":[20, 0, 0, 0,
-                         0, 20, 0, 0,
-                         0, 0, 20, 0,
-                         0, 0, 0, 1]     
+            "transform":[10, 0, 0, 0,
+                         0, 3, 0, 2,
+                         0, 0, 10, 0,
+                         0, 0, 0, 1]
         }
     ]
 }
