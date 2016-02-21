@@ -1,0 +1,22 @@
+{
+    
+"name":"simplebox",
+    
+"receiver":[5, 1.5, 0],
+    
+"source":[0, 0, 0], 
+    
+"children":[
+        
+	{
+            
+	 "mesh":"meshes/box.off",
+         "color":[0.0, 0.5, 1.0],
+         "rcoeff":0.5,
+         "transform":  [1, 0, 0, 0,
+          		0, 1, 0, 0,
+          		0, 0, 1, 0,
+          		0, 0, 0, 1]     
+         }
+    ]
+}
