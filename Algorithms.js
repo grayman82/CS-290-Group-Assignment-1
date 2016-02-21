@@ -264,13 +264,9 @@ function addImageSourcesFunctions(scene) {
         //the first element and scene.source should be the last element of every array in scene.paths
         
         // check direct path from source to receiver
-        var source = scene.source;
-        var receiver = scene.receiver; 
-        //console.log("source: " + vec3.str(source.pos));
-        //console.log("receiver: " + vec3.str(receiver.pos));
-        var p0 = receiver.pos;
+        var p0 = scene.receiver.pos;
         var v = vec3.create();
-        vec3.subtract(v, source.pos, p0); // ray from receiver to source --> source - receiver
+        vec3.subtract(v, scene.source.pos, p0); // ray from receiver to source --> source - receiver
         var normV = vec3.create();
         vec3.normalize(normV, v); //normalize v to get direction of the ray
         checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); //check for occlusions 
