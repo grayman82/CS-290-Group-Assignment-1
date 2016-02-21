@@ -10,13 +10,12 @@
 //(you can assume that all polygons are convex and use the area method)
 
 function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
-    //TODO: Fill this in
     //Step 1: Make a new array of vec3s which holds "vertices" transformed to world
     //coordinates (hint: vec3 has a function "transformMat4" which is useful)
     var wc_vertices = [];
-    for (vertex in vertices) {
+    for (var i = 0; i < vertices.length; i++) {
         var wc_vertex = vec3.create();
-        vec3.transformMat4(wc_vertex, vertex, mvMatrix);
+        vec3.transformMat4(wc_vertex, vertices[i], mvMatrix);
         wc_vertices.push(wc_vertex);
     }
     //Step 2: Compute the plane normal of the plane spanned by the transformed vertices
@@ -29,7 +28,8 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     vec3.normalize(normal, normal);
     if (vec3.dot(normal, V) == 0) return null;
     //Step 3: Perform ray intersect plane
-    var top = -1 * vec3.dot(P0, normal);
+    var sub = vec3.create();
+    var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normal);
     var bottom = vec3.dot(V, normal);
     var t_int = top / bottom;
     if (t_int <= 0) return null;
@@ -48,7 +48,8 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     for (var i = 0; i < wc_vertices.length-1; i++) {
         area2 += getTriangleArea(intercept, wc_vertices[i], wc_vertices[i+1]);
     }
-    if (Math.absolute(area1 - area2) > Math.pow(10, -4)) return null;
+    area2 += getTriangleArea(intercept, wc_vertices[wc_vertices.length-1], wc_vertices[0]);
+    if (Math.abs(area1 - area2) > Math.pow(10, -4)) return null;
 
     //Step 5: Return the intersection point if it exists or null if it's outside
     //of the polygon or if the ray is perpendicular to the plane normal (no intersection)
@@ -296,17 +297,32 @@ function addImageSourcesFunctions(scene) {
 
 
   scene.extractPaths = function() {
-
     scene.paths = [];
- //TODO: Finish this. Extract the rest of the paths by backtracing from
+
+    //TODO: Finish this. Extract the rest of the paths by backtracing from
     //the image sources you calculated.  Return an array of arrays in
     //scene.paths.  Recursion is highly recommended
     //Each path should start at the receiver and end at the source
     //(or vice versa), so scene.receiver should be the first element
     //and scene.source should be the last element of every array in
     //scene.paths
-
-  }
+    var imsources_sorted = [];
+    var done = false;
+    var curr_order = 0;
+    while (done == false) {
+        var sources_of_order = [];
+        for (var i = 0; i < scene.imsources.length; i++) {
+            if (scene.imsources[i].order == curr_order) {
+                sources_of_order.push(scene.imsources[i]);
+            }
+        }
+        if (sources_of_order.length == 0) done = true;
+        else {
+            imsources_sorted.push(sources_of_order);
+            curr_order++
+        }
+    }
+}
 
 //Inputs: Fs: Sampling rate (samples per second)
   scene.computeImpulseResponse = function(Fs) {
