@@ -311,7 +311,7 @@ function addImageSourcesFunctions(scene) {
         //(or vice versa), so scene.receiver should be the first element
         //and scene.source should be the last element of every array in
         //scene.paths
-        var imsources_sorted = [];
+        scene.imsources_sorted = [];
         var done = false;
         var curr_order = 0;
         while (done == false) {
@@ -323,7 +323,7 @@ function addImageSourcesFunctions(scene) {
             }
             if (sources_of_order.length == 0) done = true;
             else {
-                imsources_sorted.push(sources_of_order);
+                scene.imsources_sorted.push(sources_of_order);
                 curr_order++
             }
         }
@@ -345,4 +345,9 @@ function addImageSourcesFunctions(scene) {
 
     }
 
+}
+
+function pathsHelper(scene, initial_point, order) {
+    if (order == 0) return [scene.source];
+    
 }
