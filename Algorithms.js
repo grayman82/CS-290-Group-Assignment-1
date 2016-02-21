@@ -109,26 +109,26 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                     vec3.cross(norm, u1, u2); //calculate plane normal using cross product
                     var n = vec3.create();
                     vec3.normalize(n, norm); // normalize n
-                    console.log("normal vector: " +norm);
-                    console.log("normalized norm vector: " +n);
+                  //  console.log("normal vector: " +norm);
+                    //console.log("normalized norm vector: " +n);
 
 
                     // s' = s - (2(s-p) dot n )*n ; assuming n is normalized (|n|=1)
 
 
                     var p = wc_vertices[0]; // point p on the plane; arbitrarily a vertex
-                    console.log("p: " +p);
+                    //console.log("p: " +p);
 
                     var vecPS = vec3.create();
                     vec3.subtract(vecPS, s.pos, p); // (s-p)
-                    console.log("s-p: " + vecPS);
+                    //console.log("s-p: " + vecPS);
 
                     var dp = 2*vec3.dot(vecPS, n); // (2(s-p) dot n )
-                    console.log("dot product*2: " +dp);
+                    //console.log("dot product*2: " +dp);
 
                     var dpn = vec3.create();
                     vec3.scale(dpn, n, dp); //(2(s-p) dot n )*n
-                    console.log("(2(s-p) dot n )*n: " +dpn);
+                  //  console.log("(2(s-p) dot n )*n: " +dpn);
 
 
                     var src = vec3.create(); // s'
@@ -273,11 +273,11 @@ function addImageSourcesFunctions(scene) {
         }
 
         //DEBUGGING
-        console.log("Number of scene sources: " + scene.imsources.length);
+        //console.log("Number of scene sources: " + scene.imsources.length);
 
         for (var a = 0; a < scene.imsources.length; a++) {
 
-            console.log("Position of scene source " +a + " : " + scene.imsources[a].pos);
+          //  console.log("Position of scene source " +a + " : " + scene.imsources[a].pos);
 
         }
 
