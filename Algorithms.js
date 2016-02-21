@@ -2,7 +2,7 @@ var sourceImageArray;
 
 
 function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
-  
+
 	return {t:1e9, P:vec3.fromValues(0, 0, 0)};
 }
 
@@ -11,7 +11,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
 
 function sceneGraphTraversal(s, node, mvMatrix){ //complete the recursive scene graph traversal
 	if ('children' in node) {
-    
+
 		for (var c = 0; c < node.children.length; c++) {
   //for each child in node.children
 			if ('mesh' in node.children[c]){ // check if node is dummy: if not dummy node, it will have a mesh object
@@ -22,7 +22,7 @@ function sceneGraphTraversal(s, node, mvMatrix){ //complete the recursive scene 
           					continue; //Don't reflect with the face (you'll get parent image)
         				}
        					var vertices = face.getVerticesPos(); //get all vertices for a 'face' in CCW order & NCS
-					// Convert vertices from NCS to WCS: 
+					// Convert vertices from NCS to WCS:
        					var nextmvMatrix = mat4.create(); //Allocate transformation matrix
        					mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform); //Calculate transformation matrix based on hierarchy
        					var wc_vertices = []; //Make a new array that will contains vertices (vec3s) in WCS
@@ -35,8 +35,8 @@ function sceneGraphTraversal(s, node, mvMatrix){ //complete the recursive scene 
 					var q = vec3.create();// create a point 'q' on the plane
 					q = wc_vertices[0]; //arbitrarily let 'q' be vertex 0
 					var source = vec3.create();
-					source = s.pos; 
-					var vecSQ = vec3.create(); //Create a vector from the source to q 
+					source = s.pos;
+					var vecSQ = vec3.create(); //Create a vector from the source to q
 					vec3.subtract(vecSQ, q, source); //calculate vecSQ=source-q
 					//calculate plane normal using transformed vertices:
 					var u1 = vec3.create(); //allocate a vector "u1" (vertex 1 to vertex 2)
@@ -60,93 +60,93 @@ function sceneGraphTraversal(s, node, mvMatrix){ //complete the recursive scene 
 
 
 function addImageSourcesFunctions(scene) {
-    
+
 	scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) {
-	
-	var tmin = Infinity;   
-		var PMin = null;  
+
+	var tmin = Infinity;
+		var PMin = null;
 		var faceMin = null;
 		if (node === null) {
-            
-			return null;
-        
-		}
-        
-		if ('mesh' in node) {     
-			var mesh = node.mesh;
-            
-			for (var f = 0; f < mesh.faces.length; f++) {
-                
-				if (mesh.faces[f] == excludeFace) {
-                    
-				continue;        
-				}
-                
-				
-				var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix);
-                
-				if (!(res === null) && (res.t < tmin)) {
-                    
-					tmin = res.t;
-                    
-					PMin = res.P;
-                    
-					faceMin = mesh.faces[f];
-                
-				}
-            
-			}
-        
-		}
-        
-        
-		if ('children' in node) {
-                  
-			for (var i = 0; i < node.children.length; i++) {
-                
-				var nextmvMatrix = mat4.create();
-                
-				mat4.mul(nextmvMatrix, mvMatrix, node.children[i].transform);
-                
-				var cres = scene.rayIntersectFaces(P0, V, node.children[i], nextmvMatrix, excludeFace);
-                
-				if (!(cres === null) && (cres.tmin < tmin)) {
-                    
-					tmin = cres.tmin;
-                    
-					PMin = cres.PMin;
-                    
-					faceMin = cres.faceMin;
-                
-				}
-            
-			}
-        
-		}
-        
-		if (PMin === null) {
-            
-			return null;
-        
-		}
-        
-		return {tmin:tmin, PMin:PMin, faceMin:faceMin};
-    
-	}
- 
 
-   
-  
+			return null;
+
+		}
+
+		if ('mesh' in node) {
+			var mesh = node.mesh;
+
+			for (var f = 0; f < mesh.faces.length; f++) {
+
+				if (mesh.faces[f] == excludeFace) {
+
+				continue;
+				}
+
+
+				var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix);
+
+				if (!(res === null) && (res.t < tmin)) {
+
+					tmin = res.t;
+
+					PMin = res.P;
+
+					faceMin = mesh.faces[f];
+
+				}
+
+			}
+
+		}
+
+
+		if ('children' in node) {
+
+			for (var i = 0; i < node.children.length; i++) {
+
+				var nextmvMatrix = mat4.create();
+
+				mat4.mul(nextmvMatrix, mvMatrix, node.children[i].transform);
+
+				var cres = scene.rayIntersectFaces(P0, V, node.children[i], nextmvMatrix, excludeFace);
+
+				if (!(cres === null) && (cres.tmin < tmin)) {
+
+					tmin = cres.tmin;
+
+					PMin = cres.PMin;
+
+					faceMin = cres.faceMin;
+
+				}
+
+			}
+
+		}
+
+		if (PMin === null) {
+
+			return null;
+
+		}
+
+		return {tmin:tmin, PMin:PMin, faceMin:faceMin};
+
+	}
+
+
+
+
 	scene.computeImageSources = function(order) {
-        
-		scene.source.order = 0;       
-		scene.source.rcoeff = 1.0;      
-		scene.source.parent = null;    
-		scene.source.genFace = null; 
+
+		scene.source.order = 0;
+		scene.source.rcoeff = 1.0;
+		scene.source.parent = null;
+		scene.source.genFace = null;
 		sourceImageArray=[scene.source];
 		scene.imsources = sourceImageArray;
-		
-	
+
+
 
 		for (var o = 1; o<=order; o++){
 			for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
@@ -158,30 +158,30 @@ function addImageSourcesFunctions(scene) {
 		}
 
 		//DEBUGGING
-		console.log(scene.imsources.length);
-	
+		console.log("Number of scene source: " + scene.imsources.length);
+
 		for (var a = 0; a < scene.imsources.length; a++) {
-    				
-			console.log(scene.imsources[a].pos);
-		
-		}       
-        
-		
-	}    
-    
-    
+
+			console.log("Position of scene source " +a + " : " + scene.imsources[a].pos);
+
+		}
+
+
+	}
+
+
 
 	scene.extractPaths = function() {
-        
+
 		scene.paths = [];
-        
-        
+
+
 	}
 
 
 	scene.computeImpulseResponse = function(Fs) {
-        
-		var SVel = 340;	   
+
+		var SVel = 340;
 
 	}
 
