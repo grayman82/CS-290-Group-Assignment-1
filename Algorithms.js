@@ -27,11 +27,11 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     vec3.cross(normal, v1, v2); //calculate plane normal using cross product
     var normalized = vec3.create();
     vec3.normalize(normalized, normal); // normalize
-    
-    if (vec3.dot(normalized, V) == 0){ // COMMENT ?
+
+    if (vec3.dot(normalized, V) == 0){ // Checks if V is parallel to the plane
     	return null;
-    } 
-    
+    }
+
     //perform ray intersect plane
     var sub = vec3.create();
     var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normalized);
