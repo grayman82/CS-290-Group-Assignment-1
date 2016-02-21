@@ -34,8 +34,8 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     
     //perform ray intersect plane
     var sub = vec3.create();
-    var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normal);
-    var bottom = vec3.dot(V, normal);
+    var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normalized);
+    var bottom = vec3.dot(V, normalized);
     var t_int = top / bottom;
     if (t_int <= 0) return null;
     //Step 4: Check to see if the intersection point is inside of the transformed
