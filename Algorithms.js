@@ -267,8 +267,22 @@ function addImageSourcesFunctions(scene) {
         // check direct path from source to receiver
         var source = scene.source;
         var receiver = scene.receiver; 
-        console.log("source: " + vec3.str(source.pos));
-        console.log("receiver: " + vec3.str(receiver.pos));
+        //console.log("source: " + vec3.str(source.pos));
+        //console.log("receiver: " + vec3.str(receiver.pos));
+        var p0 = receiver.pos;
+        var v = vec3.create();
+        vec3.subtract(v, source.pos, p0); // ray from receiver to source --> source - receiver
+        var normV = vec3.create();
+        vec3.normalize(normV, v); //normalize v to get direction of the ray
+        checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); //check for occlusions 
+        if (checkIntersect == null){ // no intersections found, add the path
+            scene.paths.push([receiver.pos, source.pos]);
+        }
+        else{ // the path is blocked by a plane
+            console.log("The direct path from source to receiver is blocked.");
+        }
+        //TODO: optionally handle if a source and/or receiver is located on a plane
+        
         
         scene.imsources_sorted = [];
         var done = false;
