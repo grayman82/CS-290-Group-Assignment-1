@@ -74,7 +74,6 @@ function getTriangleArea(a, b, c) {
 
 function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive scene graph traversal
   if ('children' in node) {
-
     for (var c = 0; c < node.children.length; c++) {
       //for each child in node.children
       if ('mesh' in node.children[c]){ // check if node is dummy: if not dummy node, it will have a mesh object
@@ -96,42 +95,52 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
           };
           //Create the mirror image across each face (plane):
 
-          var u1 = vec3.create(); //allocate a vector "u1" (vertex 1 to vertex 2)
+ var u1 = vec3.create(); //allocate a vector "u1" (vertex 1 to vertex 2)
           var u2 = vec3.create(); //allocate a vector "u2" (vertex 1 to vertex 3)
           vec3.subtract(u1, wc_vertices[1], wc_vertices[0]); //calculate the vector
           vec3.subtract(u2, wc_vertices[2], wc_vertices[0]); //calculate the vector
           var norm = vec3.create(); //allocate a vector for the plane normal
           vec3.cross(norm, u1, u2); //calculate plane normal using cross product
+          var n = vec3.create();
+          vec3.normalize(n, norm); // normalize n
           console.log("normal vector: " +norm);
-          //var p = vec3.create();
-          //**ISSUE IS HERE: need to calculate p correctly with vec3 functions >:(
-          //p = source - 2*((source-q)*norm)*norm; //The mirror image of s, snew =  s - 2((s-q)*n)*n
-
-          var p = vec3.create();
-          var spos = vec3.create();
-          var s1 = vec3.create();
-          var src = vec3.create();
-          var tempVec = vec3.create();
-          var out = vec3.create();
-          p = wc_vertices[0];    // Use vertices to find a point 'p' on the plane
-          spos = s.pos;
-          vec3.subtract(out, spos, p); // Create a vector from the source to this point (vec=source-q)
-          vec3.scale(out, out, 2);
-          var tempNum = vec3.dot(out, norm);
-            //console.log("temp1: " +out);
-            //console.log("tempNum: " +tempNum);
-          vec3.scale(tempVec,norm, tempNum);
-          //console.log("tempVec: " +tempVec);
-          vec3.subtract(src,spos, tempVec);  // The mirror image of s, snew =  s - 2((s-q)*n)*n
+          console.log("normalized norm vector: " +n);
+          
+          
+          // s' = s - (2(s-p) dot n )*n ; assuming n is normalized (|n|=1)
+          
+          
+          var p = wc_vertices[0]; // point p on the plane; arbitrarily a vertex
+          console.log("p: " +p);
+          
+          var vecPS = vec3.create();
+          vec3.subtract(vecPS, s.pos, p); // (s-p)
+          console.log("s-p: " + vecPS);
+        
+          var dp = 2*vec3.dot(vecPS, n); // (2(s-p) dot n )
+          console.log("dot product*2: " +dp);
+          
+          var dpn = vec3.create(); 
+          vec3.scale(dpn, n, dp); //(2(s-p) dot n )*n
+          console.log("(2(s-p) dot n )*n: " +dpn);
+           
+           
+          var src = vec3.create(); // s'
+          vec3.subtract(src, s.pos, dpn);
+          
+          
+          
 
           var imgSrc = {pos:src, order: (s.order + 1), parent:s, genFace:face, rcoeff:s.rcoeff};
           scene.imsources.push(imgSrc);
-        //  console.log("position vector for mirror source: " +  src);
-          //console.log("position vector for mirror source (using img): " +  imgSrc.pos);
-
-          //sourceImageArray.push(imgSrc); // add snew to scene.imsources[]
-          ////  scene.imsources.push(snew);
         }
+      }
+      else{
+
+        var nextmvMatrix = mat4.create(); //Allocate transformation matrix
+        mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform);
+
+
       }
       sceneGraphTraversal(s, node.children[c], nextmvMatrix, scene); // recursive call on child
     }
