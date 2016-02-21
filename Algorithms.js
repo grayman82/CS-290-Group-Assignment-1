@@ -263,7 +263,7 @@ function addImageSourcesFunctions(scene) {
         //Each path should start at the receiver and end at the source (or vice versa), so scene.receiver should be 
         //the first element and scene.source should be the last element of every array in scene.paths
         
-        // check direct path from source to receiver
+        // check direct path from source to receiver aka order "0"
         var p0 = scene.receiver.pos;
         var v = vec3.create();
         vec3.subtract(v, scene.source.pos, p0); // ray from receiver to source --> source - receiver
@@ -278,6 +278,8 @@ function addImageSourcesFunctions(scene) {
         }
         //TODO: optionally handle if a source and/or receiver is located on a plane
         
+        
+        // recursively do all other orders 
         
         scene.imsources_sorted = [];
         var done = false;
