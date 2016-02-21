@@ -324,7 +324,7 @@ function addImageSourcesFunctions(scene) {
             if (sources_of_order.length == 0) done = true;
             else {
                 scene.imsources_sorted.push(sources_of_order);
-                curr_order++
+                curr_order++;
             }
         }
         scene.paths = pathsHelper(scene, scene.receiver, scene.imsources_sorted.length-1, null);
