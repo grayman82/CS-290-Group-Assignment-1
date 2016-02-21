@@ -237,7 +237,6 @@ function addImageSourcesFunctions(scene) {
     //array should contain a field "pos" which describes the position, as well
     //as an element "rcoeff" which stores the reflection coefficient at that
     //part of the path, which will be used to compute decays in "computeInpulseResponse()"
-    //Don't forget the direct path from source to receiver!
     
     //Useful function to use:
     // scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace)-- computes intersections
@@ -276,7 +275,7 @@ function addImageSourcesFunctions(scene) {
         vec3.normalize(normV, v); //normalize v to get direction of the ray
         checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); //check for occlusions 
         if (checkIntersect == null){ // no intersections found, add the path
-            scene.paths.push([receiver.pos, source.pos]);
+            scene.paths.push([scene.receiver, scene.source]);
         }
         else{ // the path is blocked by a plane
             console.log("The direct path from source to receiver is blocked.");
