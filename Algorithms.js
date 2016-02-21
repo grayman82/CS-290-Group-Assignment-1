@@ -63,7 +63,6 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
 
 }
 
-
 function getTriangleArea(a, b, c) {
     var v1 = vec3.create(); //allocate a vector "v1" (ab)
     var v2 = vec3.create(); //allocate a vector "v2" (ac)
@@ -75,8 +74,6 @@ function getTriangleArea(a, b, c) {
     var area = 0.5*vec3.len(cp) //calculate area by halving the magnitude of the cp vector (area of parallelogram formed by v1 and v2)
     return area;
 }
-
-
 
 function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive scene graph traversal
     if ('children' in node) { // check if we need this
@@ -100,7 +97,8 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                         wc_vertices.push(wc_vertex);
                     };
                     //Create the mirror image across each face (plane):
-
+                    
+                    //calculate plane normal and normalize
                     var u1 = vec3.create(); //allocate a vector "u1" (vertex 1 to vertex 2)
                     var u2 = vec3.create(); //allocate a vector "u2" (vertex 1 to vertex 3)
                     vec3.subtract(u1, wc_vertices[1], wc_vertices[0]); //calculate the vector
@@ -112,48 +110,32 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                     console.log("normal vector: " +norm);
                     console.log("normalized norm vector: " +n);
 
-
                     // s' = s - (2(s-p) dot n )*n ; assuming n is normalized (|n|=1)
-
-
                     var p = wc_vertices[0]; // point p on the plane; arbitrarily a vertex
                     console.log("p: " +p);
-
                     var vecPS = vec3.create();
                     vec3.subtract(vecPS, s.pos, p); // (s-p)
                     console.log("s-p: " + vecPS);
-
                     var dp = 2*vec3.dot(vecPS, n); // (2(s-p) dot n )
                     console.log("dot product*2: " +dp);
-
                     var dpn = vec3.create();
                     vec3.scale(dpn, n, dp); //(2(s-p) dot n )*n
                     console.log("(2(s-p) dot n )*n: " +dpn);
-
-
                     var src = vec3.create(); // s'
                     vec3.subtract(src, s.pos, dpn);
-
-
-
-
+                    
                     var imgSrc = {pos:src, order: (s.order + 1), parent:s, genFace:face, rcoeff:s.rcoeff};
                     scene.imsources.push(imgSrc);
                 }
             }
             else{
-
                 var nextmvMatrix = mat4.create(); //Allocate transformation matrix
                 mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform);
-
-
             }
             sceneGraphTraversal(s, node.children[c], nextmvMatrix, scene); // recursive call on child
         }
     }
-
 }
-
 
 function addImageSourcesFunctions(scene) {
     //Purpose: A recursive function provided which helps to compute intersections
@@ -211,9 +193,7 @@ function addImageSourcesFunctions(scene) {
         if (PMin === null) {
             return null;
         }
-
         return {tmin:tmin, PMin:PMin, faceMin:faceMin};
-
     }
 
     //IMAGE SOURCE GENERATION
@@ -258,8 +238,24 @@ function addImageSourcesFunctions(scene) {
     //as an element "rcoeff" which stores the reflection coefficient at that
     //part of the path, which will be used to compute decays in "computeInpulseResponse()"
     //Don't forget the direct path from source to receiver!
-
-
+    
+    //Useful function to use:
+    // scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace)-- computes intersections
+    //of rays with all faces in the scene, taking into consideration the scene graph structure
+    // This function recursively traverses the scene tree and intersects all faces. 
+    // This function works with rayIntersectPolygon() to find the location of the first intersection
+    // Be sure to check that an intersection with the plane spanned by the polygon is actually 
+    //contained inside of the polygon. More information about the parameters is provided in the code, 
+    //but see the next point for what "excludeFace" means
+    
+    //When you make your recursive function and are casting a ray from a particular point on the path 
+    //that resulted from the ray intersecting a face, be sure to exclude the face that contains that 
+    //point from the check. Otherwise, it will intersect that face at t = 0, and that face will be 
+    //in front of every other face. For instance, in the image below, when casting the blue ray from 
+    //the magenta point, exclude the magenta plane (line in this 2D example) from the occlusion check. 
+    //You can pass along this face as the parameter excludeFace in scene.rayIntersectFaces()
+    
+    
     scene.extractPaths = function() {
         scene.paths = [];
 
