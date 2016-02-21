@@ -355,7 +355,14 @@ function pathsHelper(scene, initial_point, order, prevFace) {
         var direction = vec3.create();
         vec3.subtract(direction, imsource, initial_point);
         var rif = scene.rayIntersectFaces(initial_point, direction, scene, mat4.create(), prevFace);
-        if (rif.faceMin == imsource.genFace) continue;
-        
+        if (rif == null || rif.faceMin != imsource.genFace) continue;
+        subpaths = pathsHelper(scene, rif.PMin, order - 1, rif.faceMin);
+        var dummy = [initial_point];
+        for (var i = 0; i < subpaths.length; i++) {
+            if (subpaths[i] == null) continue;
+            var path = dummy.concat(subpaths[i]);
+            paths.push[path];
+        }
     }
+    return paths;
 }
