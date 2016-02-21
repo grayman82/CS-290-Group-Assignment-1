@@ -347,7 +347,15 @@ function addImageSourcesFunctions(scene) {
 
 }
 
-function pathsHelper(scene, initial_point, order) {
+function pathsHelper(scene, initial_point, order, prevFace) {
     if (order == 0) return [scene.source];
-    
+    paths = [];
+    for (var i = 0; i < scene.imsources_sorted[order].length; i++) {
+        imsource = scene.imsources_sorted[order][i];
+        var direction = vec3.create();
+        vec3.subtract(direction, imsource, initial_point);
+        var rif = scene.rayIntersectFaces(initial_point, direction, scene, mat4.create(), prevFace);
+        if (rif.faceMin == imsource.genFace) continue;
+        
+    }
 }
