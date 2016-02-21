@@ -39,6 +39,7 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
           vec3.subtract(u2, wc_vertices[2], wc_vertices[0]); //calculate the vector
           var norm = vec3.create(); //allocate a vector for the plane normal
           vec3.cross(norm, u1, u2); //calculate plane normal using cross product
+          console.log("normal vector: " +norm);
           //var p = vec3.create();
           //**ISSUE IS HERE: need to calculate p correctly with vec3 functions >:(
           //p = source - 2*((source-q)*norm)*norm; //The mirror image of s, snew =  s - 2((s-q)*n)*n
@@ -54,13 +55,16 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
           vec3.subtract(out, spos, p); // Create a vector from the source to this point (vec=source-q)
           vec3.scale(out, out, 2);
           var tempNum = vec3.dot(out, norm);
-
-          vec3.scale(tempVec,tempNum, norm);
+            //console.log("temp1: " +out);
+            //console.log("tempNum: " +tempNum);
+          vec3.scale(tempVec,norm, tempNum);
+          //console.log("tempVec: " +tempVec);
           vec3.subtract(src,spos, tempVec);  // The mirror image of s, snew =  s - 2((s-q)*n)*n
 
           var imgSrc = {pos:src, order: (s.order + 1), parent:s, genFace:face, rcoeff:s.rcoeff};
           scene.imsources.push(imgSrc);
-
+        //  console.log("position vector for mirror source: " +  src);
+          //console.log("position vector for mirror source (using img): " +  imgSrc.pos);
 
           //sourceImageArray.push(imgSrc); // add snew to scene.imsources[]
           ////  scene.imsources.push(snew);
