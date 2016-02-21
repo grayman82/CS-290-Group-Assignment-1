@@ -18,16 +18,21 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
         vec3.transformMat4(wc_vertex, vertices[i], mvMatrix);
         wc_vertices.push(wc_vertex);
     }
-    //Step 2: Compute the plane normal of the plane spanned by the transformed vertices
-    var v1 = vec3.create();
-    vec3.subtract(v1, wc_vertices[0], wc_vertices[1]);
-    var v2 = vec3.create();
-    vec3.subtract(v2, wc_vertices[1], wc_vertices[2]);
-    var normal = vec3.create();
-    vec3.cross(normal, v1, v2);
-    vec3.normalize(normal, normal);
-    if (vec3.dot(normal, V) == 0) return null;
-    //Step 3: Perform ray intersect plane
+    // compute the plane normal with WCS vertices and normalize:
+    var v1 = vec3.create(); //allocate a vector "v1" (vertex 1 to vertex 2)
+    var v2 = vec3.create(); //allocate a vector "v2" (vertex 1 to vertex 3)
+    vec3.subtract(v1, wc_vertices[1], wc_vertices[0]); //calculate the vector
+    vec3.subtract(v2, wc_vertices[2], wc_vertices[0]); //calculate the vector
+    var normal = vec3.create(); //allocate a vector for the plane normal
+    vec3.cross(normal, v1, v2); //calculate plane normal using cross product
+    var normalized = vec3.create();
+    vec3.normalize(normalized, normal); // normalize
+    
+    if (vec3.dot(normalized, V) == 0){ // COMMENT ?
+    	return null;
+    } 
+    
+    //perform ray intersect plane
     var sub = vec3.create();
     var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normal);
     var bottom = vec3.dot(V, normal);
@@ -51,11 +56,11 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     area2 += getTriangleArea(intercept, wc_vertices[wc_vertices.length-1], wc_vertices[0]);
     if (Math.abs(area1 - area2) > Math.pow(10, -4)) return null;
 
-    //Step 5: Return the intersection point if it exists or null if it's outside
-    //of the polygon or if the ray is perpendicular to the plane normal (no intersection)
+    //Return:
+    //P: intersection point OR null if it's outside of the polygon or if the ray is perpendicular to the plane normal
+    //t: used to sort intersections in order of occurrence to figure out which one happened first
     return {t:t_int, P:vec3.fromValues(intercept[0], intercept[1], intercept[2])}; //These are dummy values
-    //you should return both an intersection point and a parameter t.  The parameter t
-    //will be used to sort intersections in order of occurrence to figure out which one happened first
+
 }
 
 
