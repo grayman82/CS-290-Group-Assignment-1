@@ -267,8 +267,8 @@ function addImageSourcesFunctions(scene) {
         // check direct path from source to receiver
         var source = scene.source;
         var receiver = scene.receiver; 
-        console.log("source: " + source);
-        console.log("receiver: " + receiver);
+        console.log("source: " + vec3.str(source.pos));
+        console.log("receiver: " + vec3.str(receiver.pos));
         
         scene.imsources_sorted = [];
         var done = false;
