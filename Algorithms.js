@@ -327,6 +327,7 @@ function addImageSourcesFunctions(scene) {
                 curr_order++
             }
         }
+        scene.paths = pathsHelper(scene, scene.receiver, scene.imsources_sorted.length-1, null);
     }
 
     //Inputs: Fs: Sampling rate (samples per second)
