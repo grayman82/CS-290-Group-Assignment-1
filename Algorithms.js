@@ -1,11 +1,74 @@
-//var sourceImageArray;
+//PATH EXTRACTION
 
+//Given a ray described by an initial point P0 and a direction V both in world coordinates,
+//check to see if it intersects the polygon described by "vertices," an array of vec3
+//values describing the location of the polygon vertices in its child frame.
+//mvMatrix is a matrix describing how to transform "vertices" into world coordinates
+//which you will have to do to get the correct intersection in world coordinates.
+//Be sure to compute the plane normal only after you have transformed the points,
+//and be sure to only compute intersections which are inside of the polygon
+//(you can assume that all polygons are convex and use the area method)
 
 function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
+    //TODO: Fill this in
+    //Step 1: Make a new array of vec3s which holds "vertices" transformed to world
+    //coordinates (hint: vec3 has a function "transformMat4" which is useful)
+    var wc_vertices = [];
+    for (vertex in vertices) {
+        var wc_vertex = vec3.create();
+        vec3.transformMat4(wc_vertex, vertex, mvMatrix);
+        wc_vertices.push(wc_vertex);
+    }
+    //Step 2: Compute the plane normal of the plane spanned by the transformed vertices
+    var v1 = vec3.create();
+    vec3.subtract(v1, wc_vertices[0], wc_vertices[1]);
+    var v2 = vec3.create();
+    vec3.subtract(v2, wc_vertices[1], wc_vertices[2]);
+    var normal = vec3.create();
+    vec3.cross(normal, v1, v2);
+    vec3.normalize(normal, normal);
+    if (vec3.dot(normal, V) == 0) return null;
+    //Step 3: Perform ray intersect plane
+    var top = -1 * vec3.dot(P0, normal);
+    var bottom = vec3.dot(V, normal);
+    var t_int = top / bottom;
+    if (t_int <= 0) return null;
+    //Step 4: Check to see if the intersection point is inside of the transformed
+    //polygon. You can assume that the polygon is convex.  If you use the area test,
+    //you can allow for some wiggle room in the two areas you're comparing (e.g.
+    //absolute difference not exceeding 1e-4)
+    var area1 = 0;
+    for (var i = 1; i < wc_vertices.length-1; i++) {
+        area1 += getTriangleArea(wc_vertices[0], wc_vertices[i], wc_vertices[i+1]);
+    }
+    var area2 = 0;
+    var intercept = vec3.create();
+    vec3.scale(intercept, V, t_int);
+    vec3.add(intercept, P0, intercept);
+    for (var i = 0; i < wc_vertices.length-1; i++) {
+        area2 += getTriangleArea(intercept, wc_vertices[i], wc_vertices[i+1]);
+    }
+    if (Math.absolute(area1 - area2) > Math.pow(10, -4)) return null;
 
-  return {t:1e9, P:vec3.fromValues(0, 0, 0)};
+    //Step 5: Return the intersection point if it exists or null if it's outside
+    //of the polygon or if the ray is perpendicular to the plane normal (no intersection)
+    return {t:t_int, P:vec3.fromValues(intercept[0], intercept[1], intercept[2])}; //These are dummy values
+    //you should return both an intersection point and a parameter t.  The parameter t
+    //will be used to sort intersections in order of occurrence to figure out which one happened first
 }
 
+
+function getTriangleArea(a, b, c) {
+    var v1 = vec3.create(); //allocate a vector "v1" (ab)
+    var v2 = vec3.create(); //allocate a vector "v2" (ac)
+    vec3.subtract(v1, b, a); //calculate the vector from point a to point b (ab = b-a)
+    vec3.subtract(v2, c, a); //calculate the vector from point a to point c (ac = c-a)
+    // area = 0.5 * |v1 x v2|
+    var cp = vec3.create(); //allocate a vector "cp" for the cross product of v1 and v2
+    vec3.cross(cp, v1, v2); //calculate cross product
+    var area = 0.5*vec3.len(cp) //calculate area by halving the magnitude of the cp vector (area of parallelogram formed by v1 and v2)
+    return area;
+}
 
 
 
@@ -78,7 +141,22 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
 
 
 function addImageSourcesFunctions(scene) {
+ //Purpose: A recursive function provided which helps to compute intersections
+    //of rays with all faces in the scene, taking into consideration the scene graph
+    //structure
 
+    //Inputs: P0 (vec3): Ray starting point, V (vec3): ray direction
+    //node (object): node in scene tree to process,
+    //mvMatrix (mat4): Matrix to put geometry in this node into world coordinates
+    //excludeFace: Pointer to face object to be excluded (don't intersect with
+    //the face that this point lies on)
+    //Returns: null if no intersection,
+    //{tmin:minimum t along ray, PMin(vec3): corresponding point, faceMin:Pointer to mesh face hit first}
+
+    //NOTE: Calling this function with node = scene and an identity matrix for mvMatrix
+    //will start the recursion at the top of the scene tree in world coordinates
+
+    //PROVIDED
   scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) {
 
     var tmin = Infinity;
@@ -152,7 +230,12 @@ function addImageSourcesFunctions(scene) {
 
   }
 
-
+//IMAGE SOURCE GENERATION
+//Purpose: Fill in the array scene.imsources[] with a bunch of source objects.
+//Inputs: order (int) : maximum number of bounces to take
+//Notes:
+//source objects need "pos", "genFace", "rcoeff", "order", & "parent" fields (at least)
+//use recursion (reflecting images of images of images (etc.) across polygon faces)
 
 
   scene.computeImageSources = function(order) {
@@ -161,8 +244,6 @@ function addImageSourcesFunctions(scene) {
     scene.source.rcoeff = 1.0;
     scene.source.parent = null;
     scene.source.genFace = null;
-    //sourceImageArray=[scene.source];
-    //scene.imsources = sourceImageArray;
     scene.imsources= [scene.source];
 
 
@@ -188,19 +269,49 @@ function addImageSourcesFunctions(scene) {
 
   }
 
+//Purpose: Based on the extracted image sources, trace back paths from the
+//receiver to the source, checking to make sure there are no occlusions
+//along the way.  Remember, you're always starting by tracing a path from
+//the receiver to the image, and then from the intersection point with
+//that image's corresponding face to the image's parent, and so on
+//all the way until you get back to the original source.
+//Fill in the array scene.paths, where each element of the array is itself
+//an array of objects describing vertices along the path, starting
+//with the receiver and ending with the source.  Each object in each path
+//array should contain a field "pos" which describes the position, as well
+//as an element "rcoeff" which stores the reflection coefficient at that
+
+//part of the path, which will be used to compute decays in "computeInpulseResponse()"
+
+//Don't forget the direct path from source to receiver!
 
 
   scene.extractPaths = function() {
 
     scene.paths = [];
-
+ //TODO: Finish this. Extract the rest of the paths by backtracing from
+    //the image sources you calculated.  Return an array of arrays in
+    //scene.paths.  Recursion is highly recommended
+    //Each path should start at the receiver and end at the source
+    //(or vice versa), so scene.receiver should be the first element
+    //and scene.source should be the last element of every array in
+    //scene.paths
 
   }
 
-
+//Inputs: Fs: Sampling rate (samples per second)
   scene.computeImpulseResponse = function(Fs) {
 
-    var SVel = 340;
+    var SVel = 340;//Sound travels at 340 meters/second
+    //TODO: Finish this.  Be sure to scale each bounce by 1/(1+r^p),
+    //where r is the length of the line segment of that bounce in meters
+    //and p is some integer less than 1 (make it smaller if you want the
+    //paths to attenuate less and to be more echo-y as they propagate)
+    //Also be sure to scale by the reflection coefficient of each material
+    //bounce (you should have stored this in extractPaths() if you followed
+    //those directions).  Use some form of interpolation to spread an impulse
+    //which doesn't fall directly in a bin to nearby bins
+    //Save the result into the array scene.impulseResp[]
 
   }
 
