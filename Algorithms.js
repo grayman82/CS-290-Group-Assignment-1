@@ -234,22 +234,22 @@ function addImageSourcesFunctions(scene) {
     }
 
 
-  /*  for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
-      if (scene.imsources[s].order === (o-1)){ //reflect image sources with 1 order less than the current order
-        sceneGraphTraversal (scene.imsources[s], scene, mat4.create(), scene); //Start recursion with scene and identity matrix
-      }*/
+    /*  for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
+    if (scene.imsources[s].order === (o-1)){ //reflect image sources with 1 order less than the current order
+    sceneGraphTraversal (scene.imsources[s], scene, mat4.create(), scene); //Start recursion with scene and identity matrix
+  }*/
 
-    for(var s=1; s<scene.imsources.length; s++){
-      var image = scene.imsources[s];
+  for(var s=1; s<scene.imsources.length; s++){
+    var image = scene.imsources[s];
 
-      //console.log("here");
-      var arrayVert = [];
-      arrayVert.push(scene.receiver);
-      //console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
-      scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
-    }
+    //console.log("here");
+    var arrayVert = [];
+    arrayVert.push(scene.receiver);
+    //console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
+    scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
+  }
 
-    //TODO: optionally handle if a source and/or receiver is located on a plane
+  //TODO: optionally handle if a source and/or receiver is located on a plane
 }
 
 
@@ -268,10 +268,17 @@ function scenePathFinder(scene, receiverPos, source, arrayVert){
   if (source == scene.source){
 
     if(cInter == null){
-    arrayVert.push(scene.source);
-    scene.paths.push(arrayVert);
-    return;
+      arrayVert.push(scene.source);
+      scene.paths.push(arrayVert);
+      return;
+    }
+    else{
 
+      if ( vec3.distance(receiverPos, cInter.PMin ) > vec3.distance(receiverPos, source.pos)    ){
+        //if distance between intersection point and receiver is greater than distance between receiver and soure, then intersec point is behind source
+       arrayVert.push(scene.source);
+        scene.paths.push(arrayVert);
+      }
     }
   }
   if(cInter != null){
