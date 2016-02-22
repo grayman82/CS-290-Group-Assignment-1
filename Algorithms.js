@@ -242,92 +242,49 @@ function addImageSourcesFunctions(scene) {
     for(var s=1; s<scene.imsources.length; s++){
       var image = scene.imsources[s];
 
-      console.log("here");
+      //console.log("here");
       var arrayVert = [];
       arrayVert.push(scene.receiver);
-      console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
-      scenePathFinder(scene, scene.receiver, image, arrayVert);
+      //console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
+      scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
     }
 
-    /*
-    parameters(source, arrayVertexes)
-
-    if source is scene.source
-    arrayVert.push(scene.source)
-    return.
-    check if ray from receiver to image source intersects plane.
-
-    if it does, then check if plane of intersection is parent plane of reflection (source.genFace)
-    if it is add vertex to array of vertexes (arrayVert.push( intersectPoint)  ), pass source.parent
-
-
-    */
-
-
     //TODO: optionally handle if a source and/or receiver is located on a plane
-    /*
-    // recursively do all other paths...
-    for (var i=1; i<scene.imsources.length; i++){ // loop through all of the images in scene.imsources[]
-    // cast a ray from the receiver to that image:
-    var p0 = scene.receiver.pos; // start the ray at the receiver
-    var image = scene.imsources[i].pos; // end the ray at the image source
-    var v = vec3.create();
-    vec3.subtract(v, image, p0); // ray from receiver to image --> image - receiver
-    var normV = vec3.create();
-    vec3.normalize(normV, v); //normalize v to get direction of the ray
-    checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); // get intersection point
-    // null or {tmin, Pmin, faceMin}
-    // PMin is a vec 3 of the intersection point
-    // faceMin is a pointer to the mesh face hit first
-    if (checkIntersect==null){
-    // not sure if this is possible unless it's the direct path
-  }
-  else{
-  var newStartPoint = checkIntersect.PMin; // intersection point with the first face... not sure this is how to access it
-  var imageParent = image.parent;
-  var v = vec3.create();
-  vec3.subtract(v, imageParent.pos, newStartPoint); // ray from intersection to imageParent --> imageParent - intersection
-  var normV = vec3.create();
-  vec3.normalize(normV, v); //normalize v to get direction of the ray
-  checkIntersect = scene.rayIntersectFaces(newStartPoint, normV, scene, mat4.create(), checkIntersect.faceMin);
-
-}
-}*/
 }
 
 
-function scenePathFinder(scene, receiver, source, arrayVert){
-  console.log("here2");
+function scenePathFinder(scene, receiverPos, source, arrayVert){
+  //console.log("here2");
   if (source == scene.source){
     arrayVert.push(scene.source);
     scene.paths.push(arrayVert);
     return;
   }
-  console.log("here3");
+  //console.log("here3");
   var v = vec3.create();
-  console.log("here3a");
-  vec3.subtract(v, source.pos, receiver.pos); // ray from receiver to source --> source - receiver
-  console.log("here3b");
+  //console.log("here3a");
+  vec3.subtract(v, source.pos, receiverPos); // ray from receiver to source --> source - receiver
+  //console.log("here3b");
   var normV = vec3.create();
   vec3.normalize(normV, v); //normalize v to get direction of the ray
   //console.log("norm v: "normV);
 
-  cInter = scene.rayIntersectFaces(receiver.pos, normV, scene, mat4.create(), null); //check for occlusions
-  console.log("here4");
+  cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), null); //check for occlusions
+  //console.log("here4");
   if(cInter != null){
-    console.log("here5");
+    //console.log("here5");
     if(cInter.faceMin == source.genFace){
-      console.log("here6");
+      //console.log("here6");
 
       var pathNode = {pos:cInter.PMin, rcoeff:source.rcoeff};
       arrayVert.push(pathNode);
-      scenePathFinder(scene, source, source.parent,  arrayVert);
+      scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert);
 
     }
 
-    console.log("here7");
+    //console.log("here7");
   }
-  console.log("here8");
+  //console.log("here8");
   /*f source is scene.source
   arrayVert.push(scene.source)
   return.
