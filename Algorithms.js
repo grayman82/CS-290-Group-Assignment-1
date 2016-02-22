@@ -230,7 +230,7 @@ function addImageSourcesFunctions(scene) {
       scene.paths.push([scene.receiver, scene.source]);
 
 
-      else  console.log("The direct path from source to receiver is blocked.");
+    //  else  console.log("The direct path from source to receiver is blocked.");
     }
 
 
@@ -246,14 +246,18 @@ function addImageSourcesFunctions(scene) {
     var arrayVert = [];
     arrayVert.push(scene.receiver);
     //console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
-    scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
+    ////scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
+    scenePathFinder(scene, scene.receiver.pos, image, arrayVert, null);
+
   }
 
   //TODO: optionally handle if a source and/or receiver is located on a plane
 }
 
 
-function scenePathFinder(scene, receiverPos, source, arrayVert){
+
+////function scenePathFinder(scene, receiverPos, source, arrayVert){
+function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
   //console.log("here2");
 
   //console.log("here3");
@@ -263,8 +267,8 @@ function scenePathFinder(scene, receiverPos, source, arrayVert){
   //console.log("here3b");
   var normV = vec3.create();
   vec3.normalize(normV, v); //normalize v to get direction of the ray
-  cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), null); //check for occlusions
-
+  ////cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), null); //check for occlusions
+  cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), excludeFace); //check for occlusions
   if (source == scene.source){
 
     if(cInter == null){
@@ -282,15 +286,14 @@ function scenePathFinder(scene, receiverPos, source, arrayVert){
     }
   }
   if(cInter != null){
-    if(cInter.faceMin == source.genFace){
+    if(cInter.faceMin == source.genFace && ( vec3.distance(receiverPos, cInter.PMin ) < vec3.distance(receiverPos, source.pos)  ) ){
       var pathNode = {pos:cInter.PMin, rcoeff:source.rcoeff};
       arrayVert.push(pathNode);
-      scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert);
+      ////scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert);
+          scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert, cInter.faceMin);
     }
   }
 }
-
-
 
 
 //Inputs: Fs: Sampling rate (samples per second)
