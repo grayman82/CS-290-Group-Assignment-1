@@ -232,6 +232,31 @@ function addImageSourcesFunctions(scene) {
 
           else  console.log("The direct path from source to receiver is blocked.");
         }
+        for(image in scene.imsources){
+
+            var arrayVert = [];
+            arrayVert.push(scene.receiver);
+            scenePathFinder(scene, scene.receiver, image, arrayVert);
+
+
+
+        }
+
+        /*
+        parameters(source, arrayVertexes)
+
+        if source is scene.source
+             arrayVert.push(scene.source)
+             return.
+        check if ray from receiver to image source intersects plane.
+
+             if it does, then check if plane of intersection is parent plane of reflection (source.genFace)
+                  if it is add vertex to array of vertexes (arrayVert.push( intersectPoint)  ), pass source.parent
+
+
+        */
+
+
         //TODO: optionally handle if a source and/or receiver is located on a plane
 /*
         // recursively do all other paths...
@@ -263,6 +288,25 @@ function addImageSourcesFunctions(scene) {
           }*/
     }
 
+
+function scenePathFinder(scene, origin, source, arrayVert){
+
+if (source == scene.source){
+
+  arrayVert.push(scene.source);
+  scene.paths.push(arrayVert);
+  return;
+
+}
+
+  /*f source is scene.source
+       arrayVert.push(scene.source)
+       return.
+  check if ray from receiver to image source intersects plane.
+
+       if it does, then check if plane of intersection is parent plane of reflection (source.genFace)
+            if it is add vertex to array of vertexes (arrayVert.push( intersectPoint)  ), pass source.parent*/
+}
 
 function pathsHelper(scene, initial_point, order, prevFace) {
     while (destination!= scene.source.pos){
