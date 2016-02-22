@@ -229,9 +229,11 @@ function addImageSourcesFunctions(scene) {
   //TODO: optionally handle if a source and/or receiver is located on a plane
 }
 
-function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){ // recursively trace back all paths
+//Recursive helper function for extracting paths
+//Traces back all paths and adds them to the path array if not blocked by elements of the scene
+function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){ 
   var v = vec3.create();
-  vec3.subtract(v, source.pos, receiverPos); // ray from receiver to source --> source - receiver
+  vec3.subtract(v, source.pos, receiverPos); // ray from receiver to image source --> image source - receiver
   var normV = vec3.create();
   vec3.normalize(normV, v); //normalize v to get direction of the ray
   cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), excludeFace); //check for occlusions
