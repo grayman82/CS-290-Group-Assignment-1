@@ -197,23 +197,13 @@ function addImageSourcesFunctions(scene) {
     // }
   }
 
-  //Purpose: Based on extracted image sources, trace back paths from the receiver to the source,
-  //checking to make sure there are no occlusions along the way.
+  scene.extractPaths = function() {// detects and stores non-obstructed paths from receiver to source
+    scene.paths = []; 
+    //elements are arrays of objects describing vertices along the path
+    //each element-array starts with the receiver and ends with the source
+    //each object in the array contains a field 'pos' and element 'rcoeff'
 
-  //Trace path from RECEIVER to IMAGE
-  //then from INTERSECTION with that image's corresponding face to the IMAGE PARENT
-  //and SO ON until you get back to the SOURCE
-  //IOW: scene.receiver = first element and scene.source = last element of every array in scene.paths
-
-  //Fill in the array scene.paths, where each element of the array is itself an array of objects describing vertices
-  //along the path, starting with the receiver and ending with the source.  Each object in each path array should contain
-  //a field "pos" which describes the position, as well as an element "rcoeff" which stores the reflection coefficient at
-  //that part of the path
-
-  scene.extractPaths = function() {
-    scene.paths = [];
-
-    // check direct path from source to receiver aka order "0"
+    // check direct path from source to receiver 
     var p0 = scene.receiver.pos;
     var v = vec3.create();
     vec3.subtract(v, scene.source.pos, p0); // ray from receiver to source --> source - receiver
@@ -224,60 +214,34 @@ function addImageSourcesFunctions(scene) {
       scene.paths.push([scene.receiver, scene.source]);
     }
     else{ // the path is blocked by a plane
-      //TODO: check if intersection point is behind source
-      if ( vec3.distance(scene.receiver.pos, checkIntersect.PMin ) > vec3.distance(scene.receiver.pos, scene.source.pos)    )
-      //if distance between intersection point and receiver is greater than distance between receiver and soure, then intersec point is behind source
-      scene.paths.push([scene.receiver, scene.source]);
-
-
-    //  else  console.log("The direct path from source to receiver is blocked.");
+      //check if intersection point is BEHIND the source using distance between IP and Receiver & Source and Receiver
+      if (vec3.distance(scene.receiver.pos, checkIntersect.PMin ) > vec3.distance(scene.receiver.pos, scene.source.pos)){
+        scene.paths.push([scene.receiver, scene.source]); //direct path not blocked-- add it to the path array
+      }
     }
 
-
-    /*  for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
-    if (scene.imsources[s].order === (o-1)){ //reflect image sources with 1 order less than the current order
-    sceneGraphTraversal (scene.imsources[s], scene, mat4.create(), scene); //Start recursion with scene and identity matrix
-  }*/
-
-  for(var s=1; s<scene.imsources.length; s++){
+  for(var s=1; s<scene.imsources.length; s++){ // check path from receiver to every image source (not including direct path)
     var image = scene.imsources[s];
-
-    //console.log("here");
     var arrayVert = [];
     arrayVert.push(scene.receiver);
-    //console.log("receiver position: "+ scene.receiver.pos + " image position: "+ image.pos);
-    ////scenePathFinder(scene, scene.receiver.pos, image, arrayVert);
     scenePathFinder(scene, scene.receiver.pos, image, arrayVert, null);
-
   }
-
   //TODO: optionally handle if a source and/or receiver is located on a plane
 }
 
-
-
-////function scenePathFinder(scene, receiverPos, source, arrayVert){
-function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
-  //console.log("here2");
-
-  //console.log("here3");
+function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){ // recursively trace back all paths
   var v = vec3.create();
-  //console.log("here3a");
   vec3.subtract(v, source.pos, receiverPos); // ray from receiver to source --> source - receiver
-  //console.log("here3b");
   var normV = vec3.create();
   vec3.normalize(normV, v); //normalize v to get direction of the ray
-  ////cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), null); //check for occlusions
   cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), excludeFace); //check for occlusions
   if (source == scene.source){
-
     if(cInter == null){
       arrayVert.push(scene.source);
       scene.paths.push(arrayVert);
       return;
     }
     else{
-
       if ( vec3.distance(receiverPos, cInter.PMin ) > vec3.distance(receiverPos, source.pos)    ){
         //if distance between intersection point and receiver is greater than distance between receiver and soure, then intersec point is behind source
        arrayVert.push(scene.source);
@@ -289,7 +253,6 @@ function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
     if(cInter.faceMin == source.genFace && ( vec3.distance(receiverPos, cInter.PMin ) < vec3.distance(receiverPos, source.pos)  ) ){
       var pathNode = {pos:cInter.PMin, rcoeff:source.rcoeff};
       arrayVert.push(pathNode);
-      ////scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert);
           scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert, cInter.faceMin);
     }
   }
