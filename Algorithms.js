@@ -61,6 +61,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     //t: used to sort intersections in order of occurrence to figure out which one happened first
     return {t:t_int, P:vec3.fromValues(intercept[0], intercept[1], intercept[2])}; //These are dummy values
 
+// TODO: check the special cases: intersection behind ray, ray parallel to plane
 }
 
 function getTriangleArea(a, b, c) {
@@ -279,25 +280,28 @@ function addImageSourcesFunctions(scene) {
         //TODO: optionally handle if a source and/or receiver is located on a plane
         
         
-        // recursively do all other orders 
-        
-        scene.imsources_sorted = [];
-        var done = false;
-        var curr_order = 0;
-        while (done == false) {
-            var sources_of_order = [];
-            for (var i = 0; i < scene.imsources.length; i++) {
-                if (scene.imsources[i].order == curr_order) {
-                    sources_of_order.push(scene.imsources[i]);
-                }
+        // recursively do all other paths...
+        for (var i=1; i<scene.imsources.length; i++){ // loop through all of the images in scene.imsources[]
+            // cast a ray from the receiver to that image: 
+            var p0 = scene.receiver.pos; // start the ray at the receiver
+            var image = scene.imsources[i].pos; // end the ray at the image source
+            var v = vec3.create();
+            vec3.subtract(v, image, p0); // ray from receiver to image --> image - receiver
+            var normV = vec3.create();
+            vec3.normalize(normV, v); //normalize v to get direction of the ray
+            checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); // get intersection point
+            // null or {tmin, Pmin, faceMin}
+            // PMin is a vec 3 of the intersection point
+            // faceMin is a pointer to the mesh face hit first
+            if (checkIntersect==null){
+                // not sure if this is possible unless it's the direct path
             }
-            if (sources_of_order.length == 0) done = true;
-            else {
-                scene.imsources_sorted.push(sources_of_order);
-                curr_order++;
-            }
+            // take the intersection point
+            // create ray from that point to that image's parent until back to the source
+            
+            
         }
-        scene.paths = pathsHelper(scene, scene.receiver, scene.imsources_sorted.length-1, null);
+        
     }
 
     //Inputs: Fs: Sampling rate (samples per second)
@@ -319,21 +323,8 @@ function addImageSourcesFunctions(scene) {
 }
 
 function pathsHelper(scene, initial_point, order, prevFace) {
-    if (order == 0) return [scene.source];
-    paths = [];
-    for (var i = 0; i < scene.imsources_sorted[order].length; i++) {
-        imsource = scene.imsources_sorted[order][i];
-        var direction = vec3.create();
-        vec3.subtract(direction, imsource, initial_point);
-        var rif = scene.rayIntersectFaces(initial_point, direction, scene, mat4.create(), prevFace);
-        if (rif == null || rif.faceMin != imsource.genFace) continue;
-        subpaths = pathsHelper(scene, rif.PMin, order - 1, rif.faceMin);
-        var dummy = [initial_point];
-        for (var i = 0; i < subpaths.length; i++) {
-            if (subpaths[i] == null) continue;
-            var path = dummy.concat(subpaths[i]);
-            paths.push[path];
-        }
+    while (destination!= scene.source.pos){
+        ...
     }
     return paths;
 }
