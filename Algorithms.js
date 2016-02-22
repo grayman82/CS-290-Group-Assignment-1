@@ -191,10 +191,10 @@ function addImageSourcesFunctions(scene) {
         }
         
         //DEBUGGING
-        console.log("Number of scene sources: " + scene.imsources.length);
-        for (var a = 0; a < scene.imsources.length; a++) {
-            console.log("Position of scene source " + a + " : " + vec3.str(scene.imsources[a].pos));
-        }
+       // console.log("Number of scene sources: " + scene.imsources.length);
+        //for (var a = 0; a < scene.imsources.length; a++) {
+           // console.log("Position of scene source " + a + " : " + vec3.str(scene.imsources[a].pos));
+       // }
     }
 
     //Purpose: Based on extracted image sources, trace back paths from the receiver to the source, 
