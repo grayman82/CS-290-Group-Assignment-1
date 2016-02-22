@@ -212,19 +212,17 @@ function addImageSourcesFunctions(scene) {
     
     scene.extractPaths = function() {
         scene.paths = [];
-        
-        // check direct path from source to receiver aka order "0"
+        // check direct path from source to receiver
         var p0 = scene.receiver.pos;
         var v = vec3.create();
         vec3.subtract(v, scene.source.pos, p0); // ray from receiver to source --> source - receiver
         var normV = vec3.create();
-        vec3.normalize(normV, v); //normalize v to get direction of the ray
+        vec3.normalize(normV, v); //normalize v to get direction
         checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); //check for occlusions 
         if (checkIntersect == null){ // no intersections found, add the path
             scene.paths.push([scene.receiver, scene.source]);
         }
         else{ // the path is blocked by a plane
-        //TODO: check if intersection point is behind source
             console.log("The direct path from source to receiver is blocked.");
         }
         //TODO: optionally handle if a source and/or receiver is located on a plane
@@ -239,33 +237,28 @@ function addImageSourcesFunctions(scene) {
             var normV = vec3.create();
             vec3.normalize(normV, v); //normalize v to get direction of the ray
             checkIntersect = scene.rayIntersectFaces(p0, normV, scene, mat4.create(), null); // get intersection point
-            // null or {tmin, Pmin, faceMin}
-            // PMin is a vec 3 of the intersection point
-            // faceMin is a pointer to the mesh face hit first
-            if (checkIntersect==null){
-                // not sure if this is possible unless it's the direct path
-            }
-            else{
-                var newStartPoint = checkIntersect.PMin; // intersection point with the first face... not sure this is how to access it
-                var imageParent = image.parent;
-                var v = vec3.create();
-                vec3.subtract(v, imageParent.pos, newStartPoint); // ray from intersection to imageParent --> imageParent - intersection
-                var normV = vec3.create();
-                vec3.normalize(normV, v); //normalize v to get direction of the ray
-                checkIntersect = scene.rayIntersectFaces(newStartPoint, normV, scene, mat4.create(), checkIntersect.faceMin);
-                
-            }
+            pathsHelper(scene, ..., checkIntersect);
         }
     }
     
     
-function pathsHelper(scene, initial_point, order, prevFace) {
-    while (destination!= scene.source.pos){
-        ...
+function pathsHelper(scene, image, checkIntersect) {
+    if (checkIntersect==null){ 
+        // this could mean that you have reached the source???
+            // scene.paths.push (...)
     }
-    return paths;
+    else{ // intersection point
+        var newStartPoint = checkIntersect.PMin; // intersection point with the first face... not sure this is how to access it
+        var imageParent = image.parent;
+        var v = vec3.create();
+        vec3.subtract(v, imageParent.pos, newStartPoint); // ray from intersection to imageParent --> imageParent - intersection
+        var normV = vec3.create();
+        vec3.normalize(normV, v); //normalize v to get direction of the ray
+        checkIntersect = scene.rayIntersectFaces(newStartPoint, normV, scene, mat4.create(), checkIntersect.faceMin);
+        pathsHelper(scene, ..., checkIntersect);
+                
+    }
 }
-
 
     //Inputs: Fs: Sampling rate (samples per second)
     scene.computeImpulseResponse = function(Fs) {
@@ -284,3 +277,6 @@ function pathsHelper(scene, initial_point, order, prevFace) {
     }
 
 }
+
+
+
