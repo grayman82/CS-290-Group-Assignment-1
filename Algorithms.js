@@ -1,5 +1,3 @@
-//PATH EXTRACTION
-
 //Given a ray described by an initial point P0 and a direction V both in world coordinates,
 //check to see if it intersects the polygon described by "vertices," an array of vec3
 //values describing the location of the polygon vertices in its child frame.
@@ -10,13 +8,11 @@
 //(you can assume that all polygons are convex and use the area method)
 
 function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
-    //Step 1: Make a new array of vec3s which holds "vertices" transformed to world
-    //coordinates (hint: vec3 has a function "transformMat4" which is useful)
-    var wc_vertices = [];
-    for (var i = 0; i < vertices.length; i++) {
-        var wc_vertex = vec3.create();
-        vec3.transformMat4(wc_vertex, vertices[i], mvMatrix);
-        wc_vertices.push(wc_vertex);
+    var wc_vertices = []; // allocate an array of vec3s to hold vertices in WCS
+    for (var i = 0; i < vertices.length; i++) { // for each vertex in NCS
+        var wc_vertex = vec3.create(); // allocate a vector to hold transformed coordinate
+        vec3.transformMat4(wc_vertex, vertices[i], mvMatrix); // transform from NCS to WCS with mvMatric
+        wc_vertices.push(wc_vertex); // add transformed vertex to new array
     }
     // compute the plane normal with WCS vertices and normalize:
     var v1 = vec3.create(); //allocate a vector "v1" (vertex 1 to vertex 2)
@@ -27,11 +23,9 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
     vec3.cross(normal, v1, v2); //calculate plane normal using cross product
     var normalized = vec3.create();
     vec3.normalize(normalized, normal); // normalize
-
     if (vec3.dot(normalized, V) == 0){ // Checks if V is parallel to the plane
     	return null;
     }
-
     //perform ray intersect plane
     var sub = vec3.create();
     var top = vec3.dot(vec3.sub(sub, wc_vertices[0], P0), normalized);
@@ -64,7 +58,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
 // TODO: check the special cases: intersection behind ray, ray parallel to plane
 }
 
-function getTriangleArea(a, b, c) {
+function getTriangleArea(a, b, c) { // returns the area of a triangle defined by vertices a, b, c
     var v1 = vec3.create(); //allocate a vector "v1" (ab)
     var v2 = vec3.create(); //allocate a vector "v2" (ac)
     vec3.subtract(v1, b, a); //calculate the vector from point a to point b (ab = b-a)
@@ -78,8 +72,7 @@ function getTriangleArea(a, b, c) {
 
 function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive scene graph traversal
     if ('children' in node) { // check if we need this
-        for (var c = 0; c < node.children.length; c++) {
-            //for each child in node.children
+        for (var c = 0; c < node.children.length; c++) {//for each child in node.children
             if ('mesh' in node.children[c]){ // check if node is dummy: if not dummy node, it will have a mesh object
                 var mesh = node.children[c].mesh; // access the mesh object
                 for (var f = 0; f < mesh.faces.length; f++){ //loop through the array of its faces
@@ -87,7 +80,7 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                     if (face == s.genFace) { //if face is the face that generated the source
                         continue; //Don't reflect with the face (you'll get parent image)
                     }
-                    var vertices = face.getVerticesPos(); //get all vertices for a 'face' in CCW order & NCS
+                    var vertices = face.getVerticesPos(); //get all vertices for a 'face' in NCS
                     // Convert vertices from NCS to WCS:
                     var nextmvMatrix = mat4.create(); //Allocate transformation matrix
                     mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform); //Calculate transformation matrix based on hierarchy
@@ -97,8 +90,7 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                         vec3.transformMat4(wc_vertex, vertices[v], nextmvMatrix);
                         wc_vertices.push(wc_vertex);
                     };
-                    //Create the mirror image across each face (plane):
-                    
+                    //Create the mirror image across each face (plane): s' = s - (2(s-p) dot n )*n ; IF n is normalized
                     //calculate plane normal and normalize
                     var u1 = vec3.create(); //allocate a vector "u1" (vertex 1 to vertex 2)
                     var u2 = vec3.create(); //allocate a vector "u2" (vertex 1 to vertex 3)
@@ -108,30 +100,22 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
                     vec3.cross(norm, u1, u2); //calculate plane normal using cross product
                     var n = vec3.create();
                     vec3.normalize(n, norm); // normalize n
-                    console.log("normal vector: " +norm);
-                    console.log("normalized norm vector: " +n);
-
-                    // s' = s - (2(s-p) dot n )*n ; assuming n is normalized (|n|=1)
                     var p = wc_vertices[0]; // point p on the plane; arbitrarily a vertex
-                    console.log("p: " +p);
                     var vecPS = vec3.create();
                     vec3.subtract(vecPS, s.pos, p); // (s-p)
-                    console.log("s-p: " + vecPS);
                     var dp = 2*vec3.dot(vecPS, n); // (2(s-p) dot n )
-                    console.log("dot product*2: " +dp);
                     var dpn = vec3.create();
                     vec3.scale(dpn, n, dp); //(2(s-p) dot n )*n
-                    console.log("(2(s-p) dot n )*n: " +dpn);
                     var src = vec3.create(); // s'
                     vec3.subtract(src, s.pos, dpn);
-                    
+                    // create image source and fill in fields apropriately
                     var imgSrc = {pos:src, order: (s.order + 1), parent:s, genFace:face, rcoeff:s.rcoeff};
-                    scene.imsources.push(imgSrc);
+                    scene.imsources.push(imgSrc); // add source to scene.imsources array
                 }
             }
-            else{
+            else{ // node is dummy (no mesh object) -- update transformation matrix
                 var nextmvMatrix = mat4.create(); //Allocate transformation matrix
-                mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform);
+                mat4.mul(nextmvMatrix, mvMatrix, node.children[c].transform); // update transformation matrix
             }
             sceneGraphTraversal(s, node.children[c], nextmvMatrix, scene); // recursive call on child
         }
@@ -139,31 +123,24 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
 }
 
 function addImageSourcesFunctions(scene) {
-    //Purpose: A recursive function provided which helps to compute intersections
-    //of rays with all faces in the scene, taking into consideration the scene graph
-    //structure
-
-    //Inputs: P0 (vec3): Ray starting point, V (vec3): ray direction
-    //node (object): node in scene tree to process,
-    //mvMatrix (mat4): Matrix to put geometry in this node into world coordinates
-    //excludeFace: Pointer to face object to be excluded (don't intersect with
-    //the face that this point lies on)
-    //Returns: null if no intersection,
-    //{tmin:minimum t along ray, PMin(vec3): corresponding point, faceMin:Pointer to mesh face hit first}
-
-    //NOTE: Calling this function with node = scene and an identity matrix for mvMatrix
-    //will start the recursion at the top of the scene tree in world coordinates
-
-    //PROVIDED
-    scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) {
-
+    
+    scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) { //computes intersection of ray with all faces in scene
+        // Note: call with node=scene and mvMatrix = identity matrix to start recursion at top of the scene tree in WCS
+        // INPUTS:
+            // P0 (vec3): ray starting point
+            // V (vec3): ray direction
+            //node (object): node in scene tree to process,
+            //mvMatrix (mat4): Matrix to put geometry in this node into world coordinates
+            //excludeFace: pointer to face object to be excluded from intersection calculations
+        // OUTPUT:
+            // null if no intersection OR 
+            // {tmin:minimum t along ray, PMin(vec3): corresponding point, faceMin:Pointer to mesh face hit first}
         var tmin = Infinity;
         var PMin = null;
         var faceMin = null;
         if (node === null) {
             return null;
         }
-
         if ('mesh' in node) {
             var mesh = node.mesh;
             for (var f = 0; f < mesh.faces.length; f++) {
@@ -190,21 +167,15 @@ function addImageSourcesFunctions(scene) {
                 }
             }
         }
-
         if (PMin === null) {
             return null;
         }
         return {tmin:tmin, PMin:PMin, faceMin:faceMin};
     }
 
-    //IMAGE SOURCE GENERATION
-    //Purpose: Fill in the array scene.imsources[] with a bunch of source objects.
-    //Inputs: order (int) : maximum number of bounces to take
-    //Notes:
-    //source objects need "pos", "genFace", "rcoeff", "order", & "parent" fields (at least)
-    //use recursion (reflecting images of images of images (etc.) across polygon faces)
-
-    scene.computeImageSources = function(order) {
+    scene.computeImageSources = function(order) { //computes array of image sources reflected across the scene up to the specified order
+        //INPUTS: order (int): max number of bounces to take
+        //Note: source objects have fields 'pos', 'genFace', 'rcoeff', 'order', and 'parent'
         scene.source.order = 0;
         scene.source.rcoeff = 1.0;
         scene.source.parent = null;
@@ -226,43 +197,21 @@ function addImageSourcesFunctions(scene) {
         }
     }
 
-    //Purpose: Based on the extracted image sources, trace back paths from the
-    //receiver to the source, checking to make sure there are no occlusions
-    //along the way.  Remember, you're always starting by tracing a path from
-    //the receiver to the image, and then from the intersection point with
-    //that image's corresponding face to the image's parent, and so on
-    //all the way until you get back to the original source.
-    //Fill in the array scene.paths, where each element of the array is itself
-    //an array of objects describing vertices along the path, starting
-    //with the receiver and ending with the source.  Each object in each path
-    //array should contain a field "pos" which describes the position, as well
-    //as an element "rcoeff" which stores the reflection coefficient at that
-    //part of the path, which will be used to compute decays in "computeInpulseResponse()"
+    //Purpose: Based on extracted image sources, trace back paths from the receiver to the source, 
+    //checking to make sure there are no occlusions along the way.  
     
-    //Useful function to use:
-    // scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace)-- computes intersections
-    //of rays with all faces in the scene, taking into consideration the scene graph structure
-    // This function recursively traverses the scene tree and intersects all faces. 
-    // This function works with rayIntersectPolygon() to find the location of the first intersection
-    // Be sure to check that an intersection with the plane spanned by the polygon is actually 
-    //contained inside of the polygon. More information about the parameters is provided in the code, 
-    //but see the next point for what "excludeFace" means
-    
-    //When you make your recursive function and are casting a ray from a particular point on the path 
-    //that resulted from the ray intersecting a face, be sure to exclude the face that contains that 
-    //point from the check. Otherwise, it will intersect that face at t = 0, and that face will be 
-    //in front of every other face. For instance, in the image below, when casting the blue ray from 
-    //the magenta point, exclude the magenta plane (line in this 2D example) from the occlusion check. 
-    //You can pass along this face as the parameter excludeFace in scene.rayIntersectFaces()
-    
+    //Trace path from RECEIVER to IMAGE
+    //then from INTERSECTION with that image's corresponding face to the IMAGE PARENT
+    //and SO ON until you get back to the SOURCE
+    //IOW: scene.receiver = first element and scene.source = last element of every array in scene.paths
+
+    //Fill in the array scene.paths, where each element of the array is itself an array of objects describing vertices 
+    //along the path, starting with the receiver and ending with the source.  Each object in each path array should contain 
+    //a field "pos" which describes the position, as well as an element "rcoeff" which stores the reflection coefficient at 
+    //that part of the path
     
     scene.extractPaths = function() {
         scene.paths = [];
-
-        //TODO: Extract the rest of the paths by backtracing from the image sources you calculated.  
-        //Return an array of arrays in scene.paths.  Recursion is highly recommended
-        //Each path should start at the receiver and end at the source (or vice versa), so scene.receiver should be 
-        //the first element and scene.source should be the last element of every array in scene.paths
         
         // check direct path from source to receiver aka order "0"
         var p0 = scene.receiver.pos;
