@@ -255,11 +255,7 @@ function addImageSourcesFunctions(scene) {
 
 function scenePathFinder(scene, receiverPos, source, arrayVert){
   //console.log("here2");
-  if (source == scene.source){
-    arrayVert.push(scene.source);
-    scene.paths.push(arrayVert);
-    return;
-  }
+
   //console.log("here3");
   var v = vec3.create();
   //console.log("here3a");
@@ -267,39 +263,27 @@ function scenePathFinder(scene, receiverPos, source, arrayVert){
   //console.log("here3b");
   var normV = vec3.create();
   vec3.normalize(normV, v); //normalize v to get direction of the ray
-  //console.log("norm v: "normV);
-
   cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), null); //check for occlusions
-  //console.log("here4");
-  if(cInter != null){
-    //console.log("here5");
-    if(cInter.faceMin == source.genFace){
-      //console.log("here6");
 
+  if (source == scene.source){
+
+    if(cInter == null){
+    arrayVert.push(scene.source);
+    scene.paths.push(arrayVert);
+    return;
+
+    }
+  }
+  if(cInter != null){
+    if(cInter.faceMin == source.genFace){
       var pathNode = {pos:cInter.PMin, rcoeff:source.rcoeff};
       arrayVert.push(pathNode);
       scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert);
-
     }
-
-    //console.log("here7");
   }
-  //console.log("here8");
-  /*f source is scene.source
-  arrayVert.push(scene.source)
-  return.
-  check if ray from receiver to image source intersects plane.
-
-  if it does, then check if plane of intersection is parent plane of reflection (source.genFace)
-  if it is add vertex to array of vertexes (arrayVert.push( intersectPoint)  ), pass source.parent*/
 }
 
-function pathsHelper(scene, initial_point, order, prevFace) {
-  while (destination!= scene.source.pos){
-    //  ...
-  }
-  return paths;
-}
+
 
 
 //Inputs: Fs: Sampling rate (samples per second)
