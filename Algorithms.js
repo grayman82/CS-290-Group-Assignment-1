@@ -279,7 +279,6 @@ function addImageSourcesFunctions(scene) {
         }
         //TODO: optionally handle if a source and/or receiver is located on a plane
         
-        
         // recursively do all other paths...
         for (var i=1; i<scene.imsources.length; i++){ // loop through all of the images in scene.imsources[]
             // cast a ray from the receiver to that image: 
@@ -296,13 +295,27 @@ function addImageSourcesFunctions(scene) {
             if (checkIntersect==null){
                 // not sure if this is possible unless it's the direct path
             }
-            // take the intersection point
-            // create ray from that point to that image's parent until back to the source
-            
-            
+            else{
+                var newStartPoint = checkIntersect.PMin; // intersection point with the first face... not sure this is how to access it
+                var imageParent = image.parent;
+                var v = vec3.create();
+                vec3.subtract(v, imageParent.pos, newStartPoint); // ray from intersection to imageParent --> imageParent - intersection
+                var normV = vec3.create();
+                vec3.normalize(normV, v); //normalize v to get direction of the ray
+                checkIntersect = scene.rayIntersectFaces(newStartPoint, normV, scene, mat4.create(), checkIntersect.faceMin);
+                
+            }
         }
-        
     }
+    
+    
+function pathsHelper(scene, initial_point, order, prevFace) {
+    while (destination!= scene.source.pos){
+        ...
+    }
+    return paths;
+}
+
 
     //Inputs: Fs: Sampling rate (samples per second)
     scene.computeImpulseResponse = function(Fs) {
@@ -320,11 +333,4 @@ function addImageSourcesFunctions(scene) {
 
     }
 
-}
-
-function pathsHelper(scene, initial_point, order, prevFace) {
-    while (destination!= scene.source.pos){
-        ...
-    }
-    return paths;
 }
