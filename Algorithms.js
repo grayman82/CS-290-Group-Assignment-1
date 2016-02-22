@@ -224,6 +224,7 @@ function addImageSourcesFunctions(scene) {
             scene.paths.push([scene.receiver, scene.source]);
         }
         else{ // the path is blocked by a plane
+        //TODO: check if intersection point is behind source
             console.log("The direct path from source to receiver is blocked.");
         }
         //TODO: optionally handle if a source and/or receiver is located on a plane
