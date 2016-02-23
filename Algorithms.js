@@ -1,13 +1,10 @@
-//Given a ray described by an initial point P0 and a direction V both in world coordinates,
-//check to see if it intersects the polygon described by "vertices," an array of vec3
-//values describing the location of the polygon vertices in its child frame.
-//mvMatrix is a matrix describing how to transform "vertices" into world coordinates
-//which you will have to do to get the correct intersection in world coordinates.
-//Be sure to compute the plane normal only after you have transformed the points,
-//and be sure to only compute intersections which are inside of the polygon
-//(you can assume that all polygons are convex and use the area method)
-
+//Checks to see if a ray (from P0 with direction V)  intersects the convex polygon represented by "vertices"
 function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
+  //INPUTS:
+    //P0-- initial point of a ray in WCS
+    //V-- direction of a ray in WCS
+    //vertices-- array of ve3 values describing the polygon vertices in its child frame (NCS)
+    //mvMatric-- matric describing how to transform "vertices" from NCS to WCS
   var wc_vertices = []; // allocate an array of vec3s to hold vertices in WCS
   for (var i = 0; i < vertices.length; i++) { // for each vertex in NCS
     var wc_vertex = vec3.create(); // allocate a vector to hold transformed coordinate
@@ -32,10 +29,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
   var bottom = vec3.dot(V, normalized);
   var t_int = top / bottom;
   if (t_int <= 0) return null;
-  //Step 4: Check to see if the intersection point is inside of the transformed
-  //polygon. You can assume that the polygon is convex.  If you use the area test,
-  //you can allow for some wiggle room in the two areas you're comparing (e.g.
-  //absolute difference not exceeding 1e-4)
+  //check to see if the intersection point is inside the transformed polygon (area test)
   var area1 = 0;
   for (var i = 1; i < wc_vertices.length-1; i++) {
     area1 += getTriangleArea(wc_vertices[0], wc_vertices[i], wc_vertices[i+1]);
@@ -55,7 +49,7 @@ function rayIntersectPolygon(P0, V, vertices, mvMatrix) {
   //t: used to sort intersections in order of occurrence to figure out which one happened first
   return {t:t_int, P:vec3.fromValues(intercept[0], intercept[1], intercept[2])}; //These are dummy values
 
-  // TODO: check the special cases: intersection behind ray, ray parallel to plane
+  // TODO: check the special cases: intersection behind ray
 }
 
 function getTriangleArea(a, b, c) { // returns the area of a triangle defined by vertices a, b, c
@@ -70,7 +64,8 @@ function getTriangleArea(a, b, c) { // returns the area of a triangle defined by
   return area;
 }
 
-function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive scene graph traversal
+//Recursively traverses the scene graph and adds image sources to the scene.imsources array
+function sceneGraphTraversal(s, node, mvMatrix, scene){ 
   if ('children' in node) { // check if we need this
     for (var c = 0; c < node.children.length; c++) {//for each child in node.children
       if ('mesh' in node.children[c]){ // check if node is dummy: if not dummy node, it will have a mesh object
@@ -123,8 +118,9 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){ //complete the recursive
 }
 
 function addImageSourcesFunctions(scene) {
-
-  scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) { //computes intersection of ray with all faces in scene
+  
+ //Computes intersection of ray with all faces in scene
+  scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) {
     // Note: call with node=scene and mvMatrix = identity matrix to start recursion at top of the scene tree in WCS
     // INPUTS:
     // P0 (vec3): ray starting point
@@ -173,7 +169,8 @@ function addImageSourcesFunctions(scene) {
     return {tmin:tmin, PMin:PMin, faceMin:faceMin};
   }
 
-  scene.computeImageSources = function(order) { //computes array of image sources reflected across the scene up to the specified order
+//Computes array of image sources reflected across the scene up to the specified order
+  scene.computeImageSources = function(order) { 
     //INPUTS: order (int): max number of bounces to take
     //Note: source objects have fields 'pos', 'genFace', 'rcoeff', 'order', and 'parent'
     scene.source.order = 0;
@@ -197,7 +194,8 @@ function addImageSourcesFunctions(scene) {
     // }
   }
 
-  scene.extractPaths = function() {// detects and stores non-obstructed paths from receiver to source
+//Detects and stores non-obstructed paths from receiver to source
+  scene.extractPaths = function() {
     scene.paths = []; 
     //elements are arrays of objects describing vertices along the path
     //each element-array starts with the receiver and ends with the source
