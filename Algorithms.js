@@ -281,13 +281,13 @@ scene.computeImpulseResponse = function(Fs) {
       var path = scene.paths[i];
       var length = 0;
       var magnitude = 1.0;
-      for (var i = 0; i < path.length-1; i++) {
-          var r = vec3.distance(path[i].pos, path[i+1].pos);
+      for (var j = 0; j < path.length-1; j++) {
+          var r = vec3.distance(path[j].pos, path[j+1].pos);
           console.log(r);
           length += r;
-          magnitude *= path[i+1].rcoeff / Math.pow(1+r, p);
+          magnitude *= path[j+1].rcoeff / Math.pow(1+r, p);
       }
-      var sampleIndex = Math.round(length / SVel * Fs);
+      var sampleIndex = Math.round(length / SVel * 44100);
       console.log(sampleIndex);
       sampleIndices.push(sampleIndex);
       magnitudes.push(magnitude);
