@@ -65,7 +65,7 @@ function getTriangleArea(a, b, c) { // returns the area of a triangle defined by
 }
 
 //Recursively traverses the scene graph and adds image sources to the scene.imsources array
-function sceneGraphTraversal(s, node, mvMatrix, scene){ 
+function sceneGraphTraversal(s, node, mvMatrix, scene){
   if ('children' in node) { // check if we need this
     for (var c = 0; c < node.children.length; c++) {//for each child in node.children
       if ('mesh' in node.children[c]){ // check if node is dummy: if not dummy node, it will have a mesh object
@@ -118,7 +118,7 @@ function sceneGraphTraversal(s, node, mvMatrix, scene){
 }
 
 function addImageSourcesFunctions(scene) {
-  
+
  //Computes intersection of ray with all faces in scene
   scene.rayIntersectFaces = function(P0, V, node, mvMatrix, excludeFace) {
     // Note: call with node=scene and mvMatrix = identity matrix to start recursion at top of the scene tree in WCS
@@ -170,7 +170,7 @@ function addImageSourcesFunctions(scene) {
   }
 
 //Computes array of image sources reflected across the scene up to the specified order
-  scene.computeImageSources = function(order) { 
+  scene.computeImageSources = function(order) {
     //INPUTS: order (int): max number of bounces to take
     //Note: source objects have fields 'pos', 'genFace', 'rcoeff', 'order', and 'parent'
     scene.source.order = 0;
@@ -196,12 +196,12 @@ function addImageSourcesFunctions(scene) {
 
 //Detects and stores non-obstructed paths from receiver to source
   scene.extractPaths = function() {
-    scene.paths = []; 
+    scene.paths = [];
     //elements are arrays of objects describing vertices along the path
     //each element-array starts with the receiver and ends with the source
     //each object in the array contains a field 'pos' and element 'rcoeff'
 
-    // check direct path from source to receiver 
+    // check direct path from source to receiver
     var p0 = scene.receiver.pos;
     var v = vec3.create();
     vec3.subtract(v, scene.source.pos, p0); // ray from receiver to source --> source - receiver
@@ -229,7 +229,7 @@ function addImageSourcesFunctions(scene) {
 
 //Recursive helper function for extracting paths
 //Traces back all paths and adds them to the path array if not blocked by elements of the scene
-function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){ 
+function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
   var v = vec3.create();
   vec3.subtract(v, source.pos, receiverPos); // ray from receiver to image source --> image source - receiver
   var normV = vec3.create();
@@ -263,6 +263,7 @@ function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
 scene.computeImpulseResponse = function(Fs) {
 
   var SVel = 340;//Sound travels at 340 meters/second
+  var p = 0.75;
   //TODO: Finish this.  Be sure to scale each bounce by 1/(1+r^p),
   //where r is the length of the line segment of that bounce in meters
   //and p is some integer less than 1 (make it smaller if you want the
@@ -272,6 +273,31 @@ scene.computeImpulseResponse = function(Fs) {
   //those directions).  Use some form of interpolation to spread an impulse
   //which doesn't fall directly in a bin to nearby bins
   //Save the result into the array scene.impulseResp[]
+  var sampleIndices = [];
+  var magnitudes = [];
+  console.log(scene.paths.length);
+  console.log(Fs);
+  for (var i = 0; i < scene.paths.length; i++) {
+      var path = scene.paths[i];
+      var length = 0;
+      var magnitude = 1.0;
+      for (var i = 0; i < path.length-1; i++) {
+          var r = vec3.distance(path[i].pos, path[i+1].pos);
+          console.log(r);
+          length += r;
+          magnitude *= path[i+1].rcoeff / Math.pow(1+r, p);
+      }
+      var sampleIndex = Math.round(length / SVel * Fs);
+      console.log(sampleIndex);
+      sampleIndices.push(sampleIndex);
+      magnitudes.push(magnitude);
+  }
+
+  var N = Math.max(sampleIndices);
+  scene.impulseResp = new Float32Array(N+1);
+  for (var i = 0; i < sampleIndices.length; i++) {
+      scene.impulseResp[sampleIndices[i]] += magnitudes[i];
+  }
 
 }
 

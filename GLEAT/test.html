@@ -1,0 +1,50 @@
+<!---For Unit Tests!--->
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--External Libraries!-->
+<script type="text/javascript" src = "js/gl-matrix-min.js"></script>
+<script type="text/javascript" src="js/webgl-utils.js"></script>
+<script type="text/javascript" src="js/numeric-1.2.6.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+
+<!--Our Scripts!-->
+<!--<script src="Geometry/PolyMesh.js"></script>!-->
+<script src="Geometry/Primitives3D.js"></script>
+</head>
+
+<body>
+
+<!---Test line intersection!--->
+<script>
+var P0 = vec3.fromValues(0, 1, 0);
+var V0 = vec3.fromValues(1, 1, 0);
+var L1 = new Line3D(P0, V0);
+
+var P1 = vec3.fromValues(0, 0, 0);
+var V1 = vec3.fromValues(-1, 1, 0);
+var L2 = new Line3D(P1, V1);
+
+var intersectP = L1.intersectOtherLine(L2);
+console.log("intersectP = " + intersectP[0] + "," + intersectP[1] + "," + intersectP[2]);
+</script>
+
+<!---Test planarity and convexity!--->
+<script>
+var v1 = vec3.fromValues(-1, 1, 0);
+var v2 = vec3.fromValues(0, 1, 0);
+var v3 = vec3.fromValues(1, 1, 0);
+var v4 = vec3.fromValues(1, 0, 0);
+var v5 = vec3.fromValues(1, -1, 0);
+var v6 = vec3.fromValues(0, -1, 0);
+var v7 = vec3.fromValues(-1, -1, 0);
+var v8 = vec3.fromValues(-1, 0, 0);
+var verts = [v1, v2, v3, v4, v5, v6, v7, v8];
+console.log(arePlanar(verts));
+console.log(are2DConvex(verts));
+</script>
+
+</body>
+</html>
+
