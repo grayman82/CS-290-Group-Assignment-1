@@ -134,6 +134,7 @@ function addImageSourcesFunctions(scene) {
     var tmin = Infinity;
     var PMin = null;
     var faceMin = null;
+    var rcoeff = -1;
     if (node === null) {
       return null;
     }
@@ -148,6 +149,7 @@ function addImageSourcesFunctions(scene) {
           tmin = res.t;
           PMin = res.P;
           faceMin = mesh.faces[f];
+          rcoeff = node.rcoeff;
         }
       }
     }
@@ -160,13 +162,14 @@ function addImageSourcesFunctions(scene) {
           tmin = cres.tmin;
           PMin = cres.PMin;
           faceMin = cres.faceMin;
+          rcoeff = cres.rcoeff;
         }
       }
     }
     if (PMin === null) {
       return null;
     }
-    return {tmin:tmin, PMin:PMin, faceMin:faceMin};
+    return {tmin:tmin, PMin:PMin, faceMin:faceMin, rcoeff:rcoeff};
   }
 
 //Computes array of image sources reflected across the scene up to the specified order
@@ -251,7 +254,7 @@ function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
   }
   if(cInter != null){
     if(cInter.faceMin == source.genFace && ( vec3.distance(receiverPos, cInter.PMin ) < vec3.distance(receiverPos, source.pos)  ) ){
-      var pathNode = {pos:cInter.PMin, rcoeff:source.rcoeff};
+      var pathNode = {pos:cInter.PMin, rcoeff:cInter.rcoeff};
       arrayVert.push(pathNode);
           scenePathFinder(scene, cInter.PMin, source.parent,  arrayVert, cInter.faceMin);
     }
