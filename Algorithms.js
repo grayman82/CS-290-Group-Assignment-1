@@ -288,7 +288,7 @@ scene.computeImpulseResponse = function(Fs) {
           length += r;
           magnitude *= path[j+1].rcoeff / Math.pow(1+r, p);
       }
-      var sampleIndex = Math.round(length / SVel * 44100);
+      var sampleIndex = Math.round(length / SVel * Fs);
       sampleIndices.push(sampleIndex);
       magnitudes.push(magnitude);
   }
