@@ -134,161 +134,161 @@ function addImageSourcesFunctions(scene) {
 
     if (node === null) return []; //return empty array if node is null
     var resultInter = []; //initialize array of intersection points
-    tFace = {tMin:Infinty, PMin:null, faceMin:null}; //initialize object to calculate necesary t parameter from receiver to face
+    tFace = {tMin:Infinity, PMin:null, faceMin:null}; //initialize object to calculate necesary t parameter from receiver to face
 
     if(source.genFace != null){ //image source has a face which it was generated from (only null in the case of the original source)
       var res = rayIntersectPolygon(P0, V, source.genFace.getVerticesPos(), mvMatrix); //check if ray intersects face of interest
-
-      //**** TODO: are the source.genFace.getVerticesPos() in the right coordinates?
-      //if they arent is there anyway to actually get them in the right coordinates since we know nothing about the parent
-      //node or transformation matrix tree of the current sources genFace. that data isnt being stored in source. Just the face
-
-      if(!(res===null)){//if the result is not null i.e. there is an intersection with face
-        tFace= {tMin:res.t, PMin:res.P, faceMin:source.genFace}; //store the t parameter in tFace to compare other intersection points
-      }
-
-      if(node.tcoeff != null && node.tcoeff != 0){ //if there is a t coefficient and its value is not 0, then tranmission is allowed
-        if ('mesh' in node) {
-          var mesh = node.mesh;
-          for (var f = 0; f < mesh.faces.length; f++) {
-            if (mesh.faces[f] == excludeFace) {
-              continue;
-            }
-            var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix); //check for intersection point between ray and face
-            if(!(res===null) && (tFace.tMin > res.t  )){ //if there is an intersection point and the t parameter is less than tFace, then add this intersection point to our array
-              var tempInter = {tMin:res.t, PMin:res.P, faceMin:mesh.faces[f], trans:1}; //trans:1 means this vertex was tranmittedd
-              resultInter.push(tempInter);
-            }
-          }
-        }
-      }
-      else {
-        //no t coeff therefore only reflection occurs
-        var tmin = Infinity;
-        var PMin = null;
-        var faceMin = null;
-        if (node === null) {
-          return null;
-        }
-        if ('mesh' in node) {
-          var mesh = node.mesh;
-          for (var f = 0; f < mesh.faces.length; f++) { //loop through all faces in mesh to find minimum t value (i.e. point that we hit first)
-            if (mesh.faces[f] == excludeFace) {
-              continue;
-            }
-            var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix); //check if ray intersects face
-            if (!(res === null) && (res.t < tmin)) {  // if ray intersects face and t parameter is less than previous value
-              var tempInter = {tMin:res.t, PMin:res.P, faceMin:mesh.faces[f], trans:0}; //update minimum point, trans:0 means point in path was reflected
-            }
-          }
-          resultInter.push(tempInter); //push this point on result array
-        }
-      }
-      if ('children' in node) { //recurse through all children
-        for (var i = 0; i < node.children.length; i++) {
-          var nextmvMatrix = mat4.create();
-          mat4.mul(nextmvMatrix, mvMatrix, node.children[i].transform);
-          var cres = scene.rayIntersectFaces(P0, V, node.children[i], nextmvMatrix, excludeFace, source); //create result array of all intersections points that occur along ray from receiver
-          resultInter.push.apply(resultInter, cres); //append result array with intersection points with children
-        }
-      }
-      resultInter.sort(function(a, b){ return a.tMin-b.tMin }); //sort result array in order of increasing t parameter i.e. intersection points from receiver to face of interest
-      return resultInter; //return array of values
+    }
+    //**** TODO: are the source.genFace.getVerticesPos() in the right coordinates?
+    //if they arent is there anyway to actually get them in the right coordinates since we know nothing about the parent
+    //node or transformation matrix tree of the current sources genFace. that data isnt being stored in source. Just the face
+    
+    if(!(res===null)){//if the result is not null i.e. there is an intersection with face
+      tFace= {tMin:res.t, PMin:res.P, faceMin:source.genFace}; //store the t parameter in tFace to compare other intersection points
     }
 
-    //Computes array of image sources reflected across the scene up to the specified order
-    scene.computeImageSources = function(order) {
-      //INPUTS: order (int): max number of bounces to take
-      //Note: source objects have fields 'pos', 'genFace', 'rcoeff', 'order', and 'parent'
-      scene.source.order = 0;
-      scene.source.rcoeff = 1.0;
-      scene.source.parent = null;
-      scene.source.genFace = null;
-      scene.imsources= [scene.source];
-
-      for (var o = 1; o<=order; o++){
-        for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
-          if (scene.imsources[s].order === (o-1)){ //reflect image sources with 1 order less than the current order
-            sceneGraphTraversal (scene.imsources[s], scene, mat4.create(), scene); //Start recursion with scene and identity matrix
+    if(node.tcoeff != null && node.tcoeff != 0){ //if there is a t coefficient and its value is not 0, then tranmission is allowed
+      if ('mesh' in node) {
+        var mesh = node.mesh;
+        for (var f = 0; f < mesh.faces.length; f++) {
+          if (mesh.faces[f] == excludeFace) {
+            continue;
+          }
+          var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix); //check for intersection point between ray and face
+          if(!(res===null) && (tFace.tMin > res.t  )){ //if there is an intersection point and the t parameter is less than tFace, then add this intersection point to our array
+            var tempInter = {tMin:res.t, PMin:res.P, faceMin:mesh.faces[f], trans:1}; //trans:1 means this vertex was tranmittedd
+            resultInter.push(tempInter);
           }
         }
-      }
-
-
-    }
-
-    //Detects and stores non-obstructed paths from receiver to source
-    scene.extractPaths = function() {
-      scene.paths = [];
-      //elements are arrays of objects describing vertices along the path
-      //each element-array starts with the receiver and ends with the source
-      //each object in the array contains a field 'pos' and element 'rcoeff'
-      for(var s=0; s<scene.imsources.length; s++){ // check path from receiver to every image source
-        var image = scene.imsources[s];
-        var arrayVert = [];
-        arrayVert.push(scene.receiver);
-        scenePathFinder(scene, scene.receiver.pos, image, arrayVert, null); //recusrive path finder from receiver to source imsources[s]
       }
     }
-
-    //Recursive helper function for extracting paths
-    //Traces back all paths and adds them to the path array if not blocked by elements of the scene
-    function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
-      var v = vec3.create();
-      vec3.subtract(v, source.pos, receiverPos); // ray from receiver to image source --> image source - receiver
-      var normV = vec3.create();
-      vec3.normalize(normV, v); //normalize v to get direction of the ray
-      var genFace = source.genFace;
-      var cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), excludeFace, source); //generate array of all intersection points between receiver and source
-
-      if (source == scene.source){ //current image source is original source of scene i.e. end of recursion for specific path
-        if(cInter.length == 0){ //no intersection points between receiver and source
-          arrayVert.push(scene.source);
-          scene.paths.push(arrayVert); //push path from receiver to source
-          return;
-        }
-        else{//there are intersection points between the receiver and original source
-          var t = (source.pos[0]  - receiverPos[0])/normV[0] ; //calculate t parameter for ray from receiver to source
-          for (var i= 0; i < cInter.length ; i++){ //loop through all intersection points
-            if( t > cInter[i].tMin ){ //if t for receiver source ray is greater than t from receiver to intersection point then we know intersection point is on the path and is between the source and receiver
-              if(cInter[i].trans == 1){//make sure point on path allows transmission
-                var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff}; //add current intersection point to path
-                arrayVert.push(pathNode);
-              }
-              else return;//we have encountered point on path which does not allow transmission i.e. blockage between receiver and source
-            }
-          }
-          arrayVert.push(scene.source);//add source to end of path
-          scene.paths.push(arrayVert); //push path to list of paths
-        }
+    else {
+      //no t coeff therefore only reflection occurs
+      var tmin = Infinity;
+      var PMin = null;
+      var faceMin = null;
+      if (node === null) {
+        return null;
       }
-
-      if(cInter.length != 0){ //source is not original source and our ray has intersection points (i.e. recursion continues)
-        if(( vec3.distance(receiverPos, cInter[length-1].PMin) < vec3.distance(receiverPos, source.pos))){ //make sure intersection point for recursion (reflection) occurs between receiver and source
-          for (var i= 0; i < cInter.length; i++){ //loop through all intersection points
-            var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff};
-            arrayVert.push(pathNode); // add all intersection points to path
+      if ('mesh' in node) {
+        var mesh = node.mesh;
+        for (var f = 0; f < mesh.faces.length; f++) { //loop through all faces in mesh to find minimum t value (i.e. point that we hit first)
+          if (mesh.faces[f] == excludeFace) {
+            continue;
           }
-          scenePathFinder(scene, cInter[length - 1].PMin, source.parent,  arrayVert, cInter[length-1].faceMin); //recurse with intersection point at end of cInter array
+          var res = rayIntersectPolygon(P0, V, mesh.faces[f].getVerticesPos(), mvMatrix); //check if ray intersects face
+          if (!(res === null) && (res.t < tmin)) {  // if ray intersects face and t parameter is less than previous value
+            var tempInter = {tMin:res.t, PMin:res.P, faceMin:mesh.faces[f], trans:0}; //update minimum point, trans:0 means point in path was reflected
+          }
+        }
+        resultInter.push(tempInter); //push this point on result array
+      }
+    }
+    if ('children' in node) { //recurse through all children
+      for (var i = 0; i < node.children.length; i++) {
+        var nextmvMatrix = mat4.create();
+        mat4.mul(nextmvMatrix, mvMatrix, node.children[i].transform);
+        var cres = scene.rayIntersectFaces(P0, V, node.children[i], nextmvMatrix, excludeFace, source); //create result array of all intersections points that occur along ray from receiver
+        resultInter.push.apply(resultInter, cres); //append result array with intersection points with children
+      }
+    }
+    resultInter.sort(function(a, b){ return a.tMin-b.tMin }); //sort result array in order of increasing t parameter i.e. intersection points from receiver to face of interest
+    return resultInter; //return array of values
+  }
+
+  //Computes array of image sources reflected across the scene up to the specified order
+  scene.computeImageSources = function(order) {
+    //INPUTS: order (int): max number of bounces to take
+    //Note: source objects have fields 'pos', 'genFace', 'rcoeff', 'order', and 'parent'
+    scene.source.order = 0;
+    scene.source.rcoeff = 1.0;
+    scene.source.parent = null;
+    scene.source.genFace = null;
+    scene.imsources= [scene.source];
+
+    for (var o = 1; o<=order; o++){
+      for (var s=0; s<scene.imsources.length; s++){ //check all previous image sources in scene.imsources
+        if (scene.imsources[s].order === (o-1)){ //reflect image sources with 1 order less than the current order
+          sceneGraphTraversal (scene.imsources[s], scene, mat4.create(), scene); //Start recursion with scene and identity matrix
         }
       }
     }
 
-
-    //Inputs: Fs: Sampling rate (samples per second)
-    scene.computeImpulseResponse = function(Fs) {
-
-      var SVel = 340;//Sound travels at 340 meters/second
-      //TODO: Finish this.  Be sure to scale each bounce by 1/(1+r^p),
-      //where r is the length of the line segment of that bounce in meters
-      //and p is some integer less than 1 (make it smaller if you want the
-      //paths to attenuate less and to be more echo-y as they propagate)
-      //Also be sure to scale by the reflection coefficient of each material
-      //bounce (you should have stored this in extractPaths() if you followed
-      //those directions).  Use some form of interpolation to spread an impulse
-      //which doesn't fall directly in a bin to nearby bins
-      //Save the result into the array scene.impulseResp[]
-
-    }
 
   }
+
+  //Detects and stores non-obstructed paths from receiver to source
+  scene.extractPaths = function() {
+    scene.paths = [];
+    //elements are arrays of objects describing vertices along the path
+    //each element-array starts with the receiver and ends with the source
+    //each object in the array contains a field 'pos' and element 'rcoeff'
+    for(var s=0; s<scene.imsources.length; s++){ // check path from receiver to every image source
+      var image = scene.imsources[s];
+      var arrayVert = [];
+      arrayVert.push(scene.receiver);
+      scenePathFinder(scene, scene.receiver.pos, image, arrayVert, null); //recusrive path finder from receiver to source imsources[s]
+    }
+  }
+
+  //Recursive helper function for extracting paths
+  //Traces back all paths and adds them to the path array if not blocked by elements of the scene
+  function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
+    var v = vec3.create();
+    vec3.subtract(v, source.pos, receiverPos); // ray from receiver to image source --> image source - receiver
+    var normV = vec3.create();
+    vec3.normalize(normV, v); //normalize v to get direction of the ray
+    var genFace = source.genFace;
+    var cInter = scene.rayIntersectFaces(receiverPos, normV, scene, mat4.create(), excludeFace, source); //generate array of all intersection points between receiver and source
+
+    if (source == scene.source){ //current image source is original source of scene i.e. end of recursion for specific path
+      if(cInter.length == 0){ //no intersection points between receiver and source
+        arrayVert.push(scene.source);
+        scene.paths.push(arrayVert); //push path from receiver to source
+        return;
+      }
+      else{//there are intersection points between the receiver and original source
+        var t = (source.pos[0]  - receiverPos[0])/normV[0] ; //calculate t parameter for ray from receiver to source
+        for (var i= 0; i < cInter.length ; i++){ //loop through all intersection points
+          if( t > cInter[i].tMin ){ //if t for receiver source ray is greater than t from receiver to intersection point then we know intersection point is on the path and is between the source and receiver
+            if(cInter[i].trans == 1){//make sure point on path allows transmission
+              var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff}; //add current intersection point to path
+              arrayVert.push(pathNode);
+            }
+            else return;//we have encountered point on path which does not allow transmission i.e. blockage between receiver and source
+          }
+        }
+        arrayVert.push(scene.source);//add source to end of path
+        scene.paths.push(arrayVert); //push path to list of paths
+      }
+    }
+
+    if(cInter.length != 0){ //source is not original source and our ray has intersection points (i.e. recursion continues)
+      if(( vec3.distance(receiverPos, cInter[length-1].PMin) < vec3.distance(receiverPos, source.pos))){ //make sure intersection point for recursion (reflection) occurs between receiver and source
+        for (var i= 0; i < cInter.length; i++){ //loop through all intersection points
+          var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff};
+          arrayVert.push(pathNode); // add all intersection points to path
+        }
+        scenePathFinder(scene, cInter[length - 1].PMin, source.parent,  arrayVert, cInter[length-1].faceMin); //recurse with intersection point at end of cInter array
+      }
+    }
+  }
+
+
+  //Inputs: Fs: Sampling rate (samples per second)
+  scene.computeImpulseResponse = function(Fs) {
+
+    var SVel = 340;//Sound travels at 340 meters/second
+    //TODO: Finish this.  Be sure to scale each bounce by 1/(1+r^p),
+    //where r is the length of the line segment of that bounce in meters
+    //and p is some integer less than 1 (make it smaller if you want the
+    //paths to attenuate less and to be more echo-y as they propagate)
+    //Also be sure to scale by the reflection coefficient of each material
+    //bounce (you should have stored this in extractPaths() if you followed
+    //those directions).  Use some form of interpolation to spread an impulse
+    //which doesn't fall directly in a bin to nearby bins
+    //Save the result into the array scene.impulseResp[]
+
+  }
+
+}
