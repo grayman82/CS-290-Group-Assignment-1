@@ -1,0 +1,71 @@
+{
+    
+"name":"SimpleDeskWithBall",
+    
+"receiver":[-2, 0.8, 0],
+    
+"source":[6, 0.8, 0], 
+    
+"children":[
+ 
+      
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 1.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	},
+
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 1.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 4,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	},
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 1.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[5, 0, 0, 2,
+                         	 0, 0.5, 0, 0.75,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	},
+	{
+            
+	 "mesh":"meshes/sphere.off",
+            "color":[10.0, 0.0, 0.0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 5,
+                         	 0, 1, 0, 5,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 4]
+
+	},
+	{
+            
+	 "mesh":"meshes/square.off",
+            "color":[10.0, 3.0, 0.0],
+            "rcoeff":0.5,
+            "transform":	[2, 0, 0, 0.5,
+                         	 0, 1, 0, -0.107,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 0.2]
+
+	}   	     	    
+
+
+    ]
+}

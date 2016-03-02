@@ -1,0 +1,59 @@
+{
+    
+"name":"reverb_3",
+    
+"receiver":[-4, 0, 0],
+    
+"source":[4, 0, 0], 
+    
+"children":[
+ 
+      {
+            
+	 	"mesh":"meshes/square.off",
+           	 "color":[0, 1, 0.2],
+           	 "rcoeff":0.5,
+           	 "transform":	[15, 0, 0, 0,
+                         	 0, 1, 0, 2,
+                         	 0, 0, 15, 0,
+                         	 0, 0, 0, 1]
+
+	},
+ 	{
+            
+	 	"mesh":"meshes/square.off",
+           	 "color":[0, 1, 0.2],
+           	 "rcoeff":0.5,
+           	 "transform":	[15, 0, 0, 0,
+                         	 0, 1, 0, -2,
+                         	 0, 0, 15, 0,
+                         	 0, 0, 0, 1]
+
+	},
+	{
+            
+	 	"mesh":"meshes/square.off",
+           	 "color":[10.0, 10.0, 10.0],
+           	 "rcoeff":0.9,
+           	 "transform":	[0.5, 0, 0, 0,
+                         	 0, 0.5, 0, -1,
+                         	 0, 0, 0.5, 0,
+                         	 0, 0, 0, 1]
+
+	},
+	{
+            
+	 	"mesh":"meshes/square.off",
+           	 "color":[10.0, 10.0, 10.0],
+           	 "rcoeff":0.9,
+           	 "transform":	[0.5, 0, 0, 0,
+                         	 0, 0.5, 0, 1,
+                         	 0, 0, 0.5, 0,
+                         	 0, 0, 0, 1]
+
+	}
+	
+	
+
+    ]
+}
