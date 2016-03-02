@@ -263,7 +263,7 @@ function scenePathFinder(scene, receiverPos, source, arrayVert, excludeFace){
 scene.computeImpulseResponse = function(Fs) {
 
   var SVel = 340;//Sound travels at 340 meters/second
-  var p = 0.75;
+  var p = 0.5;
   //TODO: Finish this.  Be sure to scale each bounce by 1/(1+r^p),
   //where r is the length of the line segment of that bounce in meters
   //and p is some integer less than 1 (make it smaller if you want the
@@ -275,25 +275,30 @@ scene.computeImpulseResponse = function(Fs) {
   //Save the result into the array scene.impulseResp[]
   var sampleIndices = [];
   var magnitudes = [];
-  console.log(scene.paths.length);
-  console.log(Fs);
+  if (scene.paths.length == 0) {
+      scene.impulseResp = [];
+      return;
+  }
   for (var i = 0; i < scene.paths.length; i++) {
       var path = scene.paths[i];
       var length = 0;
       var magnitude = 1.0;
       for (var j = 0; j < path.length-1; j++) {
           var r = vec3.distance(path[j].pos, path[j+1].pos);
-          console.log(r);
           length += r;
           magnitude *= path[j+1].rcoeff / Math.pow(1+r, p);
       }
       var sampleIndex = Math.round(length / SVel * 44100);
-      console.log(sampleIndex);
       sampleIndices.push(sampleIndex);
       magnitudes.push(magnitude);
   }
 
-  var N = Math.max(sampleIndices);
+  var N = 0;
+  for (var i = 0; i < sampleIndices.length; i++) {
+    if (sampleIndices[i] > N) {
+        N = sampleIndices[i];
+    }
+  }
   scene.impulseResp = new Float32Array(N+1);
   for (var i = 0; i < sampleIndices.length; i++) {
       scene.impulseResp[sampleIndices[i]] += magnitudes[i];
