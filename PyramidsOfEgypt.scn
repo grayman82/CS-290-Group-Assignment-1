@@ -1,0 +1,266 @@
+
+{
+    
+"name":"PyramidsOfEgypt",
+    
+"receiver":[-2, 0.8, 0],
+    
+"source":[20.5, 1.63, 11.27], 
+ 
+"children":[
+ 
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 0.2,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, -1.2,
+                         	 0, 0, 0, 0.2]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 0.75,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0.5,
+                         	 0, 0, 0, 0.2]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 2.7,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 2.4,
+                         	 0, 0, 0, 0.3]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/sphere.off",
+            "color":[7, 0, 1],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 2,
+                         	 0, 1, 0, 5.5,
+                         	 0, 0, 1, -0.3,
+                         	 0, 0, 0, 1.2]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 14,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 11,
+                         	 0, 0, 0, 0.95]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 14,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 9.5,
+                         	 0, 0, 0, 0.95]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/squareP.off",
+            "color":[3.4, 2, 0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 14,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 8,
+                         	 0, 0, 0, 0.95]
+},
+{ 
+        
+	         
+	 "mesh":"meshes/square.off",
+            "color":[3, 1.8, 0],
+            "rcoeff":0.5,
+            "transform":	[100, 0, 0, 0,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 100, 0,
+                         	 0, 0, 0, 1]
+},
+{
+     "transform":   		[0.866, 0, 0.5, 26.65,
+    			     	 0, 1, 0, 0,
+                        	 -0.5, 0, 0.866, 7.232,
+                       		 0, 0, 0, 1.9],
+   
+      "children":[
+		{ 
+        
+	         
+		 "mesh":"meshes/sphinxhead.off",
+          	  "color":[4, 0, 1],
+           	 "rcoeff":0.5,
+           	 "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 5,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+         	   "color":[4, 0, 1],
+         	   "rcoeff":0.5,
+           	 "transform":	[0.8, 0, 0, 0.5,
+                         	 0, 2, 0, 1,
+                         	 0, 0, 7, -3.5,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+          	  "color":[4, 0, 1],
+           	 "rcoeff":0.5,
+           	 "transform":	[0.45, 0, 0, -0.13,
+           	              	 0, 0.8, 0, 0.42,
+                         	 0, 0, 2.7, 0,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+          	  "color":[4, 0, 1],
+          	  "rcoeff":0.5,
+           	 "transform":	[0.45, 0, 0, 1.13,
+                         	 0, 0.8, 0, 0.42,
+                         	 0, 0, 2.7, 0,
+      	                   	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+        	    "color":[4, 0, 1],
+         	   "rcoeff":0.5,
+          	  "transform":	[0.45, 0, 0, -0.13,
+                         	 0, 0.9, 0, 0.48,
+                         	 0, 0, 1.2, -5,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+        	    "color":[4, 0, 1],
+         	   "rcoeff":0.5,
+         	   "transform":	[0.45, 0, 0, 1.13,
+                         	 0, 0.9, 0, 0.48,
+                         	 0, 0, 1.2, -5,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+      		  "color":[4, 0, 1],
+       	    	 "rcoeff":0.5,
+           	 "transform":	[0.45, 0, 0, -0.13,
+                         	 0, 2.2, 0, 1.11,
+                         	 0, 0, 1.4, -6.3,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/box.off",
+          	  "color":[4, 0, 1],
+          	  "rcoeff":0.5,
+          	  "transform":	[0.45, 0, 0, 1.13,
+                         	 0, 2.2, 0, 1.11,
+                         	 0, 0, 1.4, -6.3,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/triangularWedge.off",
+         	   "color":[4, 0, 1],
+        	    "rcoeff":0.5,
+        	    "transform":[1, 0, 0, 0,
+                         	 0, 1, 0, 5,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/irrPrllgrm.off",
+          	  "color":[4, 0, 1],
+          	  "rcoeff":0.5,
+           	 "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 5,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+		},
+		{ 
+        
+	         
+		 "mesh":"meshes/trapezoidBox.off",
+         	   "color":[4, 0, 1],
+          	  "rcoeff":0.5,
+          	  "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 5,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+		},
+		{
+     		"transform":   	[-1, 0, 0, 1,
+    			     	 0, 1, 0, 5,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1],
+   
+      		"children":[
+			{ 
+        
+	         
+	 		"mesh":"meshes/triangularWedge.off",
+         	  	 "color":[4, 0, 1],
+          	 	 "rcoeff":0.5,
+           		 "transform":	[1, 0, 0, 0,
+                         		 0, 1, 0, 0,
+                         		 0, 0, 1, 0,
+                         		 0, 0, 0, 1]
+			},
+			{ 
+        
+	         
+			 "mesh":"meshes/irrPrllgrm.off",
+        		    "color":[4, 0, 1],
+         		   "rcoeff":0.5,
+           		 "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+			}
+		]
+
+		}
+	]
+	}
+
+	
+
+]
+}

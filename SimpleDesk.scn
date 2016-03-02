@@ -1,0 +1,49 @@
+{
+    
+"name":"simpleDesk",
+    
+"receiver":[5, 1.5, 0],
+    
+"source":[-2, 0, 5], 
+    
+"children":[
+ 
+      
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 1.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 0,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	},
+
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 1.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[1, 0, 0, 4,
+                         	 0, 1, 0, 0,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	},
+	{
+            
+	 "mesh":"meshes/box.off",
+            "color":[0.0, 5.0, 1.0],
+            "rcoeff":0.5,
+            "transform":	[5, 0, 0, 2,
+                         	 0, 0.5, 0, 0.75,
+                         	 0, 0, 1, 0,
+                         	 0, 0, 0, 1]
+
+	}   	    
+
+
+    ]
+}
