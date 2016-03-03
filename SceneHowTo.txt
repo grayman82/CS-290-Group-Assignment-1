@@ -1,0 +1,91 @@
+Scene File Notes
+
+- Meshes
+  + meshes/box.off  |  use to  create squares and rectangles
+  + meshes/sphere.off  | use to create spheres and ellipses
+  +
+
+- Colors
+  + RED [10.0, 0.0, 0.0]
+  + WHITE [10.0, 5.0, 2.0]
+  + TURQUOISE [0.0, 1.0, 1.0]
+  + YELLOW [10.0, 3.0, 0.0]
+  + PEACH [6.0, 1.0, 1.0]
+  + FOREST GREEN [0.0, 1.0, 0.5]
+  + PALE YELLOW [2.0, 3.0, 1.0]
+
+- rCoeff
+
+- Transform-- **with respect to parent node**
+  + translate right/left	[1, 0, 0, X,
+                        	 0, 1, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + translate up/down		[1, 0, 0, 0,
+                        	 0, 1, 0, X,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + translate front/back	[1, 0, 0, 0,
+                        	 0, 1, 0, 0,
+                        	 0, 0, 1, X,
+                       		 0, 0, 0, 1]
+
+  + stretch on x-axis		[X, 0, 0, 0,
+                        	 0, 1, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + stretch on y-axis		[1, 0, 0, 0,
+                        	 0, X, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + stretch on z-axis		[1, 0, 0, 0,
+                        	 0, 1, 0, 0,
+                        	 0, 0, X, 0,
+                       		 0, 0, 0, 1]
+
+  + Scaling			[1, 0, 0, 0,
+    X>1, reduction in volume     0, 1, 0, 0,
+    X<1, increase in volume    	 0, 0, 1, 0,
+                       		 0, 0, 0, X]
+
+  + Shearing			[1, X, X, 0,
+    			     	 X, 1, X, 0,
+                        	 X, X, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + Rotation about z axis	[cos X, sin X, 0, 0,
+    			     	 -sin X, cos X, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + Rotation about x axis	[1, 0, 0, 0,
+    			     	 0, cos X, sin X, 0,
+                        	 0, -sin X, cos X, 0,
+                       		 0, 0, 0, 1]
+
+  + Rotation about y axis	[cos X, 0, -sin X, 0,
+    			     	 0, 1, 0, 0,
+                        	 sin X, 0, cos X, 0,
+                       		 0, 0, 0, 1]
+
+  + Reflection through xy        [1, 0, 0, 0,
+    			     	 0, 1, 0, 0,
+                        	 0, 0, -1, 0,
+                       		 0, 0, 0, 1]
+
+  + Reflection through xz        [1, 0, 0, 0,
+    			     	 0, -1, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+  + Reflection through yz        [-1, 0, 0, 0,
+    			     	 0, 1, 0, 0,
+                        	 0, 0, 1, 0,
+                       		 0, 0, 0, 1]
+
+- Children
+  + to add a new object, add a child field to the bottomest child
