@@ -1,0 +1,32 @@
+OFF
+# https://en.wikipedia.org/wiki/OFF_(file_format)
+# IleDeLaCite_plane
+
+# first line: number vertices, number of faces, number of edges
+# list of vertices X Y Z coordinates
+
+# list of faces: number of vertices, sequence number of vertices indexed from 0
+
+16 1 16
+
+0 0 0
+170 32 0
+470 110 0
+700 130 0
+780 140 0
+860 133 0
+900 130 0
+950 108 0
+1000 82 0
+1140 -65 0
+1180 -90 0
+950 -153 0
+860 -160 0
+730 -143 0
+386 -115 0
+170 -32 0
+
+
+
+
+5 0 1 2 3 4 
