@@ -5,6 +5,7 @@
 //////////////////////////////////////////////////////////
 
 var globalFs = 44100;//The global sampling rate of the loaded audio
+var myColor = false; //variable to test enable/disable color
 
 //Recursive function to load all of the meshes and to 
 //put all of the matrix transformations into mat4 objects
@@ -212,7 +213,7 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         glcanvas.gl.clear(glcanvas.gl.COLOR_BUFFER_BIT | glcanvas.gl.DEPTH_BUFFER_BIT);
         
         var pMatrix = mat4.create();
-        mat4.perspective(pMatrix, 45, glcanvas.gl.viewportWidth / glcanvas.gl.viewportHeight, 0.01, 100.0);
+        mat4.perspective(pMatrix, 45, glcanvas.gl.viewportWidth / glcanvas.gl.viewportHeight, 0.01, 1000.0);//alllow to render far images
         //First get the global modelview matrix based on the camera
         var mvMatrix = glcanvas.camera.getMVMatrix();
         //Then drawn the scene
@@ -247,6 +248,12 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         //Draw the paths
         if (glcanvas.drawPaths) {
             glcanvas.pathDrawer.repaint(pMatrix, mvMatrix);
+        }
+        
+        
+         myColor= false;
+         if(glcanvas.drawColors){
+          myColor = true; //set color as true if clicked on screen
         }
         
         //Draw lines and points for debugging
@@ -403,10 +410,17 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         glcanvas.pathDrawer.reset();
         for (var i = 0; i < glcanvas.scene.paths.length; i++) {
             var path = glcanvas.scene.paths[i];
-            for (var j = 0; j < path.length-1; j++) {
+            
+              var colorval = 1;
+            for (var j = path.length - 1; j > 0; j--) {
+                //Draw all of the paths as a sequence of red line segments
+                if(myColor) colorval = colorval * path[j].rcoeff; //if color is toggled
+                glcanvas.pathDrawer.drawLine(path[j].pos, path[j-1].pos, vec3.fromValues(colorval, 0, 0)); //draw ray with certain color
+            }
+           /* for (var j = 0; j < path.length-1; j++) {
                 //Draw all of the paths as a sequence of red line segments
                 glcanvas.pathDrawer.drawLine(path[j].pos, path[j+1].pos, vec3.fromValues(1, 0, 0));
-            }
+            }*/
         }
         requestAnimFrame(glcanvas.repaint);
     }
