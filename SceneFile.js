@@ -6,6 +6,9 @@
 
 //Recursive function to load all of the meshes and to
 //put all of the matrix transformations into mat4 objects
+
+var myColor = false;
+
 function parseNode(node) {
     //Step 1: Make a matrix object for the transformation
     if (!('transform' in node)) {
@@ -152,6 +155,7 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
     glcanvas.drawEdges = true;
     glcanvas.drawImageSources = true;
     glcanvas.drawPaths = true;
+    glcanvas.drawColors = true;
 
 	glcanvas.gl = null;
 	glcanvas.lastX = 0;
@@ -239,6 +243,12 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         //Draw the paths
         if (glcanvas.drawPaths) {
             glcanvas.pathDrawer.repaint(pMatrix, mvMatrix);
+        }
+
+        myColor= false;
+        if(glcanvas.drawColors){
+
+          myColor = true;
         }
 
 		//Draw lines and points for debugging
@@ -395,10 +405,20 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight, scene) {
         glcanvas.pathDrawer.reset();
         for (var i = 0; i < glcanvas.scene.paths.length; i++) {
             var path = glcanvas.scene.paths[i];
-            for (var j = 0; j < path.length-1; j++) {
+            var colorval = 1;
+            /*for (var j = 0; j < path.length-1; j++) {
                 //Draw all of the paths as a sequence of red line segments
-                //If I want to debug color...******
-                glcanvas.pathDrawer.drawLine(path[j].pos, path[j+1].pos, vec3.fromValues(1, 0, 0));
+                //If I want to debug color...****** find it here
+                colorval = colorval * path[j].rcoeff;
+                glcanvas.pathDrawer.drawLine(path[j].pos, path[j+1].pos, vec3.fromValues(1, colorval, colorval));
+            }*/
+
+
+            for (var j = path.length - 1; j > 0; j--) {
+                //Draw all of the paths as a sequence of red line segments
+                //If I want to debug color...****** find it here
+                if(myColor) colorval = colorval * path[j].rcoeff;
+                glcanvas.pathDrawer.drawLine(path[j].pos, path[j-1].pos, vec3.fromValues(colorval, 0, 0));
             }
         }
         requestAnimFrame(glcanvas.repaint);
