@@ -138,16 +138,22 @@ function addImageSourcesFunctions(scene) {
 
     if(source.genFace != null){ //image source has a face which it was generated from (only null in the case of the original source)
       var res = rayIntersectPolygon(P0, V, source.genFace.getVerticesPos(), mvMatrix); //check if ray intersects face of interest
-    }
+
     //**** TODO: are the source.genFace.getVerticesPos() in the right coordinates?
     //if they arent is there anyway to actually get them in the right coordinates since we know nothing about the parent
     //node or transformation matrix tree of the current sources genFace. that data isnt being stored in source. Just the face
-    
+
     if(!(res===null)){//if the result is not null i.e. there is an intersection with face
       tFace= {tMin:res.t, PMin:res.P, faceMin:source.genFace}; //store the t parameter in tFace to compare other intersection points
     }
+  }
+  else{
+    var t = (source.pos[0]  - receiverPos[0])/P0[0] ;
+    tFace= {tMin:t, PMin:source.pos, faceMin:source.genFace};
+  }
 
     if(node.tcoeff != null && node.tcoeff != 0){ //if there is a t coefficient and its value is not 0, then tranmission is allowed
+      console.log("error shouldnt be transmitting");
       if ('mesh' in node) {
         var mesh = node.mesh;
         for (var f = 0; f < mesh.faces.length; f++) {
@@ -181,7 +187,9 @@ function addImageSourcesFunctions(scene) {
             var tempInter = {tMin:res.t, PMin:res.P, faceMin:mesh.faces[f], trans:0}; //update minimum point, trans:0 means point in path was reflected
           }
         }
+        if(!(tempInter == null)){
         resultInter.push(tempInter); //push this point on result array
+        }
       }
     }
     if ('children' in node) { //recurse through all children
@@ -252,6 +260,7 @@ function addImageSourcesFunctions(scene) {
         for (var i= 0; i < cInter.length ; i++){ //loop through all intersection points
           if( t > cInter[i].tMin ){ //if t for receiver source ray is greater than t from receiver to intersection point then we know intersection point is on the path and is between the source and receiver
             if(cInter[i].trans == 1){//make sure point on path allows transmission
+              console.log("tansmission value is 1, shouldnt be");
               var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff}; //add current intersection point to path
               arrayVert.push(pathNode);
             }
@@ -264,12 +273,22 @@ function addImageSourcesFunctions(scene) {
     }
 
     if(cInter.length != 0){ //source is not original source and our ray has intersection points (i.e. recursion continues)
-      if(( vec3.distance(receiverPos, cInter[length-1].PMin) < vec3.distance(receiverPos, source.pos))){ //make sure intersection point for recursion (reflection) occurs between receiver and source
-        for (var i= 0; i < cInter.length; i++){ //loop through all intersection points
-          var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff};
-          arrayVert.push(pathNode); // add all intersection points to path
+      if(( vec3.distance(receiverPos, cInter[cInter.length-1].PMin) < vec3.distance(receiverPos, source.pos))){ //make sure intersection point for recursion (reflection) occurs between receiver and source
+        for (var i= 0; i < cInter.length - 1; i++){ //loop through all intersection points minus reflected point
+
+          if(cInter[i].trans == 1){//make sure point on path allows transmission
+            console.log("tansmission value is 1, shouldnt be");
+            var pathNode = {pos:cInter[i].PMin, rcoeff:source.rcoeff}; //add current intersection point to path
+            arrayVert.push(pathNode);
+          }
+          else return; //return if transmission is not allowed
         }
-        scenePathFinder(scene, cInter[length - 1].PMin, source.parent,  arrayVert, cInter[length-1].faceMin); //recurse with intersection point at end of cInter array
+
+        if(source.genFace === cInter[cInter.length - 1].faceMin){
+        var pathNode = {pos:cInter[cInter.length-1].PMin, rcoeff:source.rcoeff}; //add reflection point to path
+        arrayVert.push(pathNode);
+        scenePathFinder(scene, cInter[cInter.length - 1].PMin, source.parent,  arrayVert, cInter[cInter.length-1].faceMin); //recurse with intersection point at end of cInter array
+      }
       }
     }
   }
