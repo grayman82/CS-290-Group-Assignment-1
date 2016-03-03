@@ -1,8 +1,7 @@
-//Do fast fft-based convolution
-function doConvolution(buffer1, buffer2) {
-    var samples1 = buffer1.getChannelData(0);
+//Programmer: Chris Tralie
+//Purpose: Handle stereo impulse response convolution
+function doConvolutionArrays(samples1, samples2) {
     M = samples1.length;
-    var samples2 = buffer2.getChannelData(0);
     N = samples2.length;
 
     //Zeropad to nearest power of 2 above N+M+1
@@ -42,17 +41,27 @@ function doConvolution(buffer1, buffer2) {
     }
     var fftRes = new FFT(NPadded, NPadded);
     var res = fftRes.inverse(real, imag);
-    var maxAbs = 0.0;
-    //Normalize output to prevent clipping
-    for (var i = 0; i < res.length; i++) {
-        if (Math.abs(res[i]) > maxAbs) {
-            maxAbs = Math.abs(res[i]);
-        }
-    }
+    return res;
+}
+
+//Do fast fft-based convolution
+function doConvolution(buffer, impbuffer) {
+    var samples1 = buffer.getChannelData(0);
+    M = samples1.length;
+    N = impbuffer.getChannelData(0).length;
+    //Zeropad to nearest power of 2 above N+M+1
+    var NPadded = Math.pow(2, Math.ceil(Math.log(N+M+1)/Math.log(2)));
+
     //Allocate space for the output buffer and copy over
-    convbuffer = context.createBuffer(1, NPadded, globalFs);
-    var convsamples = convbuffer.getChannelData(0);
-    for (var i = 0; i < res.length; i++) {
-        convsamples[i] = res[i];
+    convbuffer = context.createBuffer(2, NPadded, globalFs);
+    var resL = doConvolutionArrays(samples1, impbuffer.getChannelData(0));
+    var convsamplesL = convbuffer.getChannelData(0);
+    for (var i = 0; i < resL.length; i++) {
+        convsamplesL[i] = resL[i];
+    }
+    var resR = doConvolutionArrays(samples1, impbuffer.getChannelData(1));
+    var convsamplesR = convbuffer.getChannelData(1);
+    for (var i = 0; i < resR.length; i++) {
+        convsamplesR[i] = resR[i];
     }
 }
