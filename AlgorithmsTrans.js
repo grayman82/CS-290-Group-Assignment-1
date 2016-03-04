@@ -152,7 +152,7 @@ function addImageSourcesFunctions(scene) {
     tFace= {tMin:t, PMin:source.pos, faceMin:source.genFace};
   }
 
-    if(node.tcoeff != null && node.tcoeff != 0){ //if there is a t coefficient and its value is not 0, then tranmission is allowed
+    if(node.tcoeff != null && node.tcoeff != 1){ //if there is a t coefficient and its value is not 1, then tranmission is allowed
       //console.log("error shouldnt be transmitting");
       if ('mesh' in node) {
         var mesh = node.mesh;
