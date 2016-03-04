@@ -50,6 +50,27 @@ intersection point between a ray and all surface elements within the node and
 parameter i.e. the closest intersection. This minimum value is then returned.
 
 #############################################################################
+Impulse Response:
+Files: Algorithms.js
+
+scene.computeImpulseResponse:
+For this function I looped through scene.paths and determined both the sample index of 
+the path and the path's corresponding magnitude by computing the length of each path and 
+using the path's segment lengths and reflection coefficients to scale the path's magnitude.
+I then stored the magnitudes in an array scene.impulseResp, in which the index of each magnitude is
+its corresponding sample index.
+
+#############################################################################
+Binaural Sound:
+Files: AlgorithmsBinaural.js, SceneFileBinaural.js, SoundToolsBinaural.js
+
+This was pretty simple to implement. First, I looked up the average distance between ears of a human head,
+which is approximately 21.5 cm. Then I extracted paths for receivers that were a distance of earWidth to the left and right
+of the receiver. Next, I computed the impulse responses for each ear by separating scene.paths by the left
+and right paths and storing the magnitudes in two separate lists.. Finally, I edited SceneFile.js and SoundTools.js 
+according to the specifications on Piazza.
+
+#############################################################################
 Near Versus Far:
 Files: SampleSceneFar.scn, SampleSceneNear.scn.
 
